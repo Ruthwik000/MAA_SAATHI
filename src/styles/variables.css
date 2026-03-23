@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  /* Dynamic Scalers */
+  --font-scale: 1;
+  --spacing-scale: 1;
+
+  /* Clinical Gallery Light Mode Variables */
+  --bg-primary: #F8F9FA;
+  --bg-secondary: #EDEEEF;
+  --bg-tertiary: #E1E3E4;
+  --surface: #FFFFFF;
+  --border: #E8EAED;
+  --border-subtle: #F3F4F5;
+  --text-primary: #191C1D;
+  --text-secondary: #594045;
+  --text-tertiary: #8D6F75;
+  --accent: #9B0044;
+  --accent-hover: #C2185B;
+  --accent-light: #FFD9DF;
+  --accent-subtle: #FDF6F9;
+  
+  --success: #005A27;
+  --success-light: #96F8A8;
+  --warning: #B45309;
+  --warning-light: #FEF3C7;
+  --danger: #BA1A1A;
+  --danger-light: #FFDAD6;
+  --info: #4C56AF;
+  --info-light: #E0E0FF;
+  
+  /* Soft Tonal Layers */
+  --shadow-card: 0 4px 32px rgba(155, 0, 68, 0.04);
+  --shadow-elevated: 0 12px 48px rgba(155, 0, 68, 0.08);
+  
+  --radius-sm: calc(8px * var(--spacing-scale));
+  --radius-md: calc(16px * var(--spacing-scale));
+  --radius-lg: calc(24px * var(--spacing-scale));
+  --radius-xl: calc(32px * var(--spacing-scale));
+  --radius-pill: 100px;
+}
+
+/* Scaling Modifiers */
+html[data-font-size="small"] { --font-scale: 0.85; --spacing-scale: 0.9; }
+html[data-font-size="medium"] { --font-scale: 1; --spacing-scale: 1; }
+html[data-font-size="large"] { --font-scale: 1.15; --spacing-scale: 1.25; }
+html[data-font-size="huge"] { --font-scale: 1.35; --spacing-scale: 1.5; }
+
+html[data-theme="dark"] {
+  /* Dark Mode Variables */
+  --bg-primary: #0C0E12;
+  --bg-secondary: #141720;
+  --bg-tertiary: #1C2028;
+  --surface: #1C2028;
+  --border: #2A2D35;
+  --border-subtle: #1F2229;
+  --text-primary: #F2F4F7;
+  --text-secondary: #9299A4;
+  --text-tertiary: #5C6370;
+  --accent: #E91E8C;
+  --accent-hover: #F06292;
+  --accent-light: #2D1020;
+  --accent-subtle: #1A0B13;
+  --success: #34D399;
+  --success-light: #0A2A1A;
+  --warning: #FBBF24;
+  --warning-light: #2A1F00;
+  --danger: #F87171;
+  --danger-light: #2A0A0A;
+  --info: #60A5FA;
+  --info-light: #0A1A2A;
+  
+  --shadow-card: none;
+  --shadow-elevated: none;
+}

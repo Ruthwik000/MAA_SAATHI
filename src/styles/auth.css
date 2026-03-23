@@ -1,0 +1,179 @@
+@import './variables.css';
+
+/* Welcome Screen Layout */
+.welcome-container {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  position: relative;
+  background-color: var(--bg-primary);
+  overflow: hidden;
+}
+
+.welcome-left {
+  height: 45%;
+  background-color: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.welcome-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  background-color: var(--bg-primary);
+  height: 55%;
+}
+
+.welcome-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: 440px;
+  height: 100%;
+}
+
+/* Toggles absolute positioning */
+.absolute-toggles-top-right {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+}
+
+/* Login Card */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-primary);
+  padding: 16px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 440px;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  box-shadow: var(--shadow-elevated);
+}
+
+[data-theme="dark"] .login-card {
+  box-shadow: none;
+}
+
+/* Role Pills */
+.role-pill {
+  padding: 8px 20px;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  background-color: transparent;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.role-pill.active {
+  background-color: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.role-pill.inactive {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Phone Input */
+.phone-input-wrapper {
+  display: flex;
+  height: 48px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  background-color: var(--surface);
+  overflow: hidden;
+  transition: all 0.2s ease;
+  align-items: center;
+}
+
+.phone-input-wrapper:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.phone-prefix {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 16px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-weight: 600;
+  border-right: 1.5px solid var(--border);
+}
+
+.phone-input-wrapper input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 0 16px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 15px;
+  outline: none;
+  height: 100%;
+}
+
+/* OTP Boxes */
+.otp-container {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.otp-box {
+  width: 48px;
+  height: 52px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  background-color: var(--surface);
+  color: var(--text-primary);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.otp-box:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+@media (min-width: 768px) {
+  .welcome-container {
+    flex-direction: row;
+  }
+  .welcome-left {
+    height: 100dvh;
+    width: 50%;
+  }
+  .welcome-right {
+    height: 100dvh;
+    width: 50%;
+    padding: 40px;
+  }
+}
