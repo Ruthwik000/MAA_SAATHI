@@ -5,7 +5,9 @@ import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTranslation } from '../../hooks/useTranslation';
-import AshaIllustration from '../../components/AshaIllustration';
+import { motion } from 'framer-motion';
+
+const HERO_IMAGE = '/welcome_avatar.png';
 
 const WelcomeScreen = () => {
   const navigate = useNavigate();
@@ -21,9 +23,9 @@ const WelcomeScreen = () => {
   // The 't' object from useTranslation will now be used directly.
 
   return (
-    <div className="welcome-container">
+    <div className="welcome-container" style={{ backgroundColor: '#FFFFFF' }}>
       {/* Absolute Header with Toggles */}
-      <div className="absolute-toggles-top-right flex items-center" style={{ gap: '16px', zIndex: 10 }}>
+      <div className="absolute-toggles-top-right flex items-center" style={{ gap: '16px', zIndex: 10, padding: '24px' }}>
         
         {/* Language Toggles */}
         <div style={{ display: 'flex', gap: '8px' }}>
@@ -85,22 +87,32 @@ const WelcomeScreen = () => {
         </button>
       </div>
 
-      {/* Left Column - Medical Illustration */}
-      <div className="welcome-left flex items-end justify-center">
-        <img 
-          src="/welcome_avatar.png" 
-          alt="ASHA Worker" 
-          className="w-full h-full object-contain"
+      {/* Left Column - Hero Image */}
+      <div className="welcome-left" style={{ 
+        position: 'relative', 
+        height: '100dvh', 
+        backgroundColor: '#FFFFFF',
+        overflow: 'hidden'
+      }}>
+        <motion.img 
+          src={HERO_IMAGE} 
+          alt="MaaSathi Community" 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1 }}
           style={{ 
-            maxHeight: '90%',
-            objectPosition: 'bottom center',
-            mixBlendMode: 'multiply'
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center center',
+            display: 'block',
+            border: 'none'
           }} 
         />
       </div>
 
       {/* Right Column - Content */}
-      <div className="welcome-right">
+      <div className="welcome-right" style={{ backgroundColor: '#FFFFFF', height: '100dvh', overflowY: 'auto' }}>
         <div className="welcome-content-wrapper">
           
           {/* Logo */}

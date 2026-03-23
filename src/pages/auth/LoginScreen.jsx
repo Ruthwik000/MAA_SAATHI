@@ -5,6 +5,9 @@ import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../hooks/useAuth';
+import { motion } from 'framer-motion';
+
+const HERO_IMAGE = '/welcome_avatar.png';
 
 // Role config — gradient per role, single shared hero image
 const ROLE_CONFIG = {
@@ -93,9 +96,12 @@ const LoginScreen = () => {
       }}>
 
         {/* Hero image — absolute, fills container exactly */}
-        <img
-          src="/login_hero.png"
+        <motion.img
+          src={HERO_IMAGE}
           alt="MaaSathi Community"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1 }}
           style={{
             position: 'absolute',
             top: 0,
@@ -103,7 +109,9 @@ const LoginScreen = () => {
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            objectPosition: 'center center'
+            objectPosition: 'center center',
+            border: 'none',
+            backgroundColor: 'transparent'
           }}
         />
 
