@@ -8,6 +8,7 @@ import { ThemeProvider } from './context/ThemeContext'
 import { LanguageProvider } from './context/LanguageContext'
 import { FontSizeProvider } from './context/FontSizeContext'
 
+import { AuthProvider } from './context/AuthContext'
 import { AppProvider } from './context/AppContext'
 
 // Register Service Worker for PWA
@@ -21,14 +22,16 @@ if ('serviceWorker' in navigator) {
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <AppProvider>
-      <ThemeProvider>
-        <FontSizeProvider>
-          <LanguageProvider>
-            <App />
-          </LanguageProvider>
-        </FontSizeProvider>
-      </ThemeProvider>
-    </AppProvider>
+    <AuthProvider>
+      <AppProvider>
+        <ThemeProvider>
+          <FontSizeProvider>
+            <LanguageProvider>
+              <App />
+            </LanguageProvider>
+          </FontSizeProvider>
+        </ThemeProvider>
+      </AppProvider>
+    </AuthProvider>
   </StrictMode>
 )

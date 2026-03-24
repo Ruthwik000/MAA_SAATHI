@@ -70,7 +70,12 @@ const LoginScreen = () => {
     setLoading(true);
     try {
       const result = await loginWithGoogle();
-      if (result.isNewUser) {
+
+      if (result.firestoreUnavailable) {
+        alert(result.firestoreMessage);
+      }
+
+      if (result.isNewUser || result.firestoreUnavailable) {
         // Pass both role and type to role setup
         navigate('/role-setup', { state: { preSelectedRole: role, preSelectedType: initialType } });
       } else {
@@ -100,8 +105,17 @@ const LoginScreen = () => {
         }
       }
     } catch (err) {
-      console.error(err);
-      alert(language === 'en' ? 'Failed to login with Google' : 'Google లాగిన్ విఫలమైంది');
+      const isConfigMissing =
+        err?.code === 'auth/configuration-not-found' ||
+        String(err?.message || '').includes('CONFIGURATION_NOT_FOUND');
+
+      const message = isConfigMissing
+        ? 'Firebase Google Sign-In is not configured for this project. Update your .env Firebase keys and enable Google sign-in in Firebase Console.'
+        : language === 'en'
+          ? (err?.message || 'Failed to login with Google')
+          : 'Google లాగిన్ విఫలమైంది';
+
+      alert(message);
     } finally {
       setLoading(false);
     }
