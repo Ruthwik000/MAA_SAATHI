@@ -32,6 +32,15 @@ import MotherSignupScreen from './pages/mother/MotherSignupScreen';
 import MotherMedicalHistoryScreen from './pages/mother/MotherMedicalHistoryScreen';
 import MotherReportsScreen from './pages/mother/MotherReportsScreen';
 import MotherReportViewerScreen from './pages/mother/MotherReportViewerScreen';
+import PatientTypeSelect from './pages/auth/PatientTypeSelect';
+
+import ElderlyHealthSurvey from './pages/patient/ElderlyHealthSurvey';
+import WellnessHealthSurvey from './pages/patient/WellnessHealthSurvey';
+import ElderlyDashboard from './pages/patient/ElderlyDashboard';
+import WellnessDashboard from './pages/patient/WellnessDashboard';
+import CaretakerDashboard from './pages/caretaker/CaretakerDashboard';
+import CaretakerTypeSelect from './pages/auth/CaretakerTypeSelect';
+import FamilyDashboard from './pages/family/FamilyDashboard';
 
 import RingAlertScreen from './pages/shared/RingAlertScreen';
 import SettingsScreen from './pages/shared/SettingsScreen';
@@ -40,10 +49,21 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* Auth & Setup */}
         <Route path="/" element={<SplashScreen />} />
         <Route path="/welcome" element={<WelcomeScreen />} />
         <Route path="/login" element={<LoginScreen />} />
         <Route path="/role-setup" element={<RoleSetupScreen />} />
+        <Route path="/patient-type-select" element={<PatientTypeSelect />} />
+        
+        {/* Patient / Elderly / Wellness Surveys */}
+        <Route path="/elderly/health-survey" element={<ElderlyHealthSurvey />} />
+        <Route path="/wellness/health-survey" element={<WellnessHealthSurvey />} />
+        
+        {/* Dashboards */}
+        <Route path="/dashboard/elderly" element={<ElderlyDashboard />} />
+        <Route path="/dashboard/wellness" element={<WellnessDashboard />} />
+        <Route path="/dashboard/caretaker" element={<CaretakerDashboard />} />
         
         {/* ASHA Routes */}
         <Route path="/asha/dashboard" element={<AshaDashboard />} />
@@ -66,7 +86,7 @@ function App() {
         <Route path="/doctor/reports" element={<ReportsListScreen />} />
         <Route path="/doctor/report/:id" element={<ReportViewerScreen />} />
 
-        {/* Mother Routes */}
+        {/* Patient / Mother Routes */}
         <Route path="/mother-entry" element={<MotherEntryScreen />} />
         <Route path="/mother-signup" element={<MotherSignupScreen />} />
         <Route path="/mother/dashboard" element={<MotherDashboard />} />
@@ -76,6 +96,10 @@ function App() {
         <Route path="/mother/profile" element={<MotherProfileScreen />} />
         <Route path="/mother/medical-history" element={<MotherMedicalHistoryScreen />} />
         <Route path="/mother/health-history" element={<MotherMedicalHistoryScreen />} />
+
+        {/* Caretaker & Family Routes */}
+        <Route path="/caretaker-type" element={<CaretakerTypeSelect />} />
+        <Route path="/family-dashboard" element={<FamilyDashboard />} />
 
         {/* Shared / Global Routes */}
         <Route path="/shared/ai-report" element={<AIReportResultScreen />} />

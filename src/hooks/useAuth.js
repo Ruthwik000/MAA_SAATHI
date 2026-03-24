@@ -51,15 +51,16 @@ export function useAuth() {
     }
   };
 
-  const setupRole = async (role) => {
+  const setupRole = async (role, patientType = '') => {
     if (!user) throw new Error("No user authenticated");
     
     const profileData = {
       uid: user.uid,
-      name: user.displayName || 'Unknown User',
+      name: user.displayName || user.email?.split('@')[0] || 'Unknown User',
       email: user.email || '',
       photoURL: user.photoURL || '',
       role: role,
+      patientType: patientType,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };

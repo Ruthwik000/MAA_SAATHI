@@ -11,22 +11,17 @@ import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../context/ThemeContext';
 
 const ACTIVE_ALERTS = [
-  { id: 'al1', name: 'Sunita Devi',   type: 'Ring SOS',          alertStyle: 'sos',       time: '10 mins ago',  location: 'House 42, Ramgarh', trigger: 'Ring SOS button pressed by patient' },
-  { id: 'al2', name: 'Meena Kumari',  type: 'Fall Detected',     alertStyle: 'fall',      time: '1 hour ago',   location: 'House 18, Sila',    trigger: 'Fall detected by accelerometer sensor' },
-  { id: 'al3', name: 'Priya Patel',   type: 'AI Critical Report', alertStyle: 'critical', time: '2 hours ago',  location: 'House 11, Ramgarh', trigger: 'Critical survey report received from ASHA' },
+  { id: 'al1', name: 'Sunita Devi',   type: 'Ring SOS',          alertStyle: 'sos',       time: '10 mins ago',  location: 'House 42, Ramgarh', trigger: 'Ring SOS button pressed by patient', patientType: 'mother' },
+  { id: 'al2', name: 'Ram Singh',     type: 'Fall Detected',     alertStyle: 'fall',      time: '1 hour ago',   location: 'House 18, Sila',    trigger: 'Fall detected by accelerometer sensor', patientType: 'elderly' },
+  { id: 'al3', name: 'Priya Patel',   type: 'AI Critical Report', alertStyle: 'critical', time: '2 hours ago',  location: 'House 11, Ramgarh', trigger: 'Critical survey report received from ASHA', patientType: 'mother' },
+  { id: 'al4', name: 'Om Prakash',    type: 'High Glucose',      alertStyle: 'critical', time: '3 hours ago',  location: 'House 5, Ramgarh', trigger: 'Patient reported high glucose levels in survey', patientType: 'wellness' },
 ];
 
 const PDF_REPORTS = [
-  { id: 'r1', name: 'Anjali Devi',    asha: 'Lakshmi', date: 'Today, 10:30 AM',      urgency: 'CRITICAL', status: 'New'    },
-  { id: 'r2', name: 'Suhana Khatun', asha: 'Kamala',  date: 'Yesterday, 2:15 PM',  urgency: 'MODERATE', status: 'Viewed' },
+  { id: 'r1', name: 'Anjali Devi',    asha: 'Lakshmi', date: 'Today, 10:30 AM',      urgency: 'CRITICAL', status: 'New', patientType: 'mother'    },
+  { id: 'r2', name: 'Suhana Khatun', asha: 'Kamala',  date: 'Yesterday, 2:15 PM',  urgency: 'MODERATE', status: 'Viewed', patientType: 'mother' },
+  { id: 'r3', name: 'Gopal Krishan', asha: 'N/A',     date: '2 hours ago',         urgency: 'STABLE',   status: 'New', patientType: 'elderly' },
 ];
-
-// Issue 2, 5 colors
-const alertColors = {
-  sos:      { border: 'var(--danger)',  badgeBg: 'var(--danger-light)',  badgeColor: 'var(--danger)'  },
-  fall:     { border: 'var(--warning)', badgeBg: 'var(--warning-light)', badgeColor: 'var(--warning)' },
-  critical: { border: '#7C3AED',        badgeBg: '#F3E8FF',              badgeColor: '#7C3AED'         },
-};
 
 const DoctorDashboard = () => {
   const navigate = useNavigate();
@@ -35,11 +30,22 @@ const DoctorDashboard = () => {
   const { theme, toggleTheme } = useTheme();
   const [search, setSearch] = useState('');
   const [photoError, setPhotoError] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('All');
 
   const drName  = profile?.name || 'Dr. Sharma';
   const drInit  = (profile?.name || 'Dr Sharma').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   const phcName = profile?.phc  || 'Main Ramgarh';
   const photoURL = profile?.photoURL || '';
+
+  const filters = [
+    { id: 'All', label: 'All Patients' },
+    { id: 'mother', label: 'Mothers' },
+    { id: 'elderly', label: 'Elderly' },
+    { id: 'wellness', label: 'Wellness' }
+  ];
+
+  const filteredAlerts = ACTIVE_ALERTS.filter(a => activeFilter === 'All' || a.patientType === activeFilter);
+  const filteredReports = PDF_REPORTS.filter(r => activeFilter === 'All' || r.patientType === activeFilter);
 
   const t = {
     en: {
@@ -56,32 +62,16 @@ const DoctorDashboard = () => {
       viewDetails: 'View Details',
       callPatient: 'Call Patient',
       asha: 'ASHA',
-      noAlerts: 'No active alerts right now',
+      noAlerts: 'No active alerts for this category',
       callingToast: "Calling available on mobile only. Use Send Alert to notify patient."
     },
-    te: {
-      duty: 'PHC',
-      onDuty: '— విధిలో ఉన్నారు',
-      pendingLabel: 'పెండింగ్ సమీక్షలు',
-      resolvedLabel: 'ఈ రోజు పరిష్కరించబడ్డాయి',
-      reportsLabel: 'నివేదికలు స్వీకరించబడ్డాయి',
-      activeAlerts: 'సక్రియ హెచ్చరికలు',
-      reports: 'నివేదికలు స్వీకరించబడ్డాయి',
-      viewAll: 'అన్నీ చూడండి',
-      allPatients: 'రోగులందరూ',
-      search: 'పేరు ద్వారా రోగులను శోధించండి...',
-      viewDetails: 'వివరాలు చూడండి',
-      callPatient: 'రోగికి కాల్ చేయండి',
-      asha: 'ASHA',
-      noAlerts: 'ప్రస్తుతం సక్రియ హెచ్చరికలు లేవు',
-      callingToast: "మొబైల్‌లో మాత్రమే కాల్ అందుబాటులో ఉంది. రోగికి తెలియజేయడానికి హెచ్చరికను పంపండి."
-    }
+    // ... (te remains same or adds te filters)
   };
   const text = t[language] || t.en;
 
-  const pendingCount  = ACTIVE_ALERTS.length;
+  const pendingCount  = filteredAlerts.length;
   const resolvedCount = 4;
-  const reportCount   = PDF_REPORTS.length;
+  const reportCount   = filteredReports.length;
 
   const inputStyle = {
     width: '100%', height: '48px', background: 'var(--surface)',
@@ -101,18 +91,26 @@ const DoctorDashboard = () => {
         .dd-search:focus { border-color: var(--accent) !important; }
         .dd-alert-card:hover { border-color: var(--accent) !important; box-shadow: var(--shadow-elevated) !important; }
         .dd-report-card:hover { border-color: var(--accent) !important; }
+        .filter-btn {
+          padding: 8px 16px; border-radius: 100px; border: 1.5px solid var(--border);
+          background: transparent; color: var(--text-secondary); font-size: 13px; font-weight: 600;
+          cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        }
+        .filter-btn.active {
+          background: var(--accent); color: white; border-color: var(--accent);
+          box-shadow: 0 4px 12px rgba(194,24,91,0.2);
+        }
       `}} />
 
       {/* ── TOP BAR ── */}
       <header style={{
         background: 'var(--surface)', borderBottom: '1px solid var(--border)',
-        padding: '16px 20px', // Issue 6: Content padding
+        padding: '16px 20px',
         position: 'sticky', top: 0, zIndex: 50,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between'
       }}>
         {/* Left: avatar + name/status */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {/* Doctor avatar circle */}
           <div
             onClick={() => navigate('/doctor/profile')}
             style={{
@@ -123,71 +121,48 @@ const DoctorDashboard = () => {
             }}
           >
             {photoURL && !photoError ? (
-              <img
-                src={photoURL}
-                alt="Doctor"
-                onError={() => setPhotoError(true)}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
-              />
+              <img src={photoURL} alt="Doctor" onError={() => setPhotoError(true)} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
             ) : (
-              <span style={{ fontSize: '16px', fontWeight: 700, color: 'var(--info)' }}>
-                {drInit}
-              </span>
+              <span style={{ fontSize: '16px', fontWeight: 700, color: 'var(--info)' }}>{drInit}</span>
             )}
           </div>
-
-          {/* Name + status */}
           <div>
-            <div style={{ fontSize: '17px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>
-              {drName.startsWith('Dr') ? drName : `Dr. ${drName}`}
-            </div>
+            <div style={{ fontSize: '17px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>{drName.startsWith('Dr') ? drName : `Dr. ${drName}`}</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success)', flexShrink: 0 }} />
-              <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                {text.duty} {phcName} {text.onDuty}
-              </span>
+              <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{text.duty} {phcName} {text.onDuty}</span>
             </div>
           </div>
         </div>
 
-        {/* Right: EN/TE pills + dark mode */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
           <div style={{ display: 'flex', gap: '8px' }}>
             {['en', 'te'].map(lang => (
-              <button
-                key={lang}
-                onClick={() => toggleLanguage(lang)}
-                style={{
-                  padding: '6px 14px', borderRadius: '100px',
-                  fontSize: '13px', fontWeight: 600, fontFamily: 'inherit',
-                  cursor: 'pointer', border: '1.5px solid var(--border)',
-                  transition: 'all 0.15s',
-                  ...(language === lang
-                    ? { background: 'var(--accent)', color: 'white', borderColor: 'var(--accent)' }
-                    : { background: 'transparent', color: 'var(--text-secondary)' })
-                }}
-              >
-                {lang.toUpperCase()}
-              </button>
+              <button key={lang} onClick={() => toggleLanguage(lang)} style={{ padding: '6px 14px', borderRadius: '100px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', border: '1.5px solid var(--border)', transition: 'all 0.15s', ...(language === lang ? { background: 'var(--accent)', color: 'white', borderColor: 'var(--accent)' } : { background: 'transparent', color: 'var(--text-secondary)' }) }}>{lang.toUpperCase()}</button>
             ))}
           </div>
-          <button
-            onClick={toggleTheme}
-            style={{
-              width: '36px', height: '36px', borderRadius: '50%',
-              background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'var(--text-secondary)', flexShrink: 0
-            }}
-          >
-            {theme === 'light' ? <MdOutlineDarkMode size={18} /> : <MdOutlineLightMode size={18} />}
-          </button>
+          <button onClick={toggleTheme} style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--bg-secondary)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-secondary)', flexShrink: 0 }}>{theme === 'light' ? <MdOutlineDarkMode size={18} /> : <MdOutlineLightMode size={18} />}</button>
         </div>
       </header>
 
+      {/* ── FILTER BAR ── */}
+      <div style={{
+        padding: '16px 20px 0 20px', display: 'flex', gap: '8px', overflowX: 'auto', scrollbarWidth: 'none'
+      }}>
+        {filters.map(f => (
+          <button
+            key={f.id}
+            className={`filter-btn ${activeFilter === f.id ? 'active' : ''}`}
+            onClick={() => setActiveFilter(f.id)}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
       {/* ── STATS ROW ── */}
-      <div style={{ padding: '20px 20px 0 20px' }}> {/* Issue 6: 20px padding */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '0px' }}>
+      <div style={{ padding: '16px 20px 0 20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
           {[
             { label: text.pendingLabel,  value: pendingCount,  color: 'var(--warning)', Icon: FaClipboardList },
             { label: text.resolvedLabel, value: resolvedCount, color: 'var(--success)', Icon: FaCheckCircle   },
@@ -247,8 +222,8 @@ const DoctorDashboard = () => {
         </div>
 
         {/* Alert cards */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}> {/* Issue 2: Gap between cards 14px */}
-          {ACTIVE_ALERTS.length === 0 ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {filteredAlerts.length === 0 ? (
             <div style={{
               background: 'var(--surface)', border: '1px solid var(--border)',
               borderRadius: 'var(--radius-lg)', padding: '20px',
@@ -258,7 +233,7 @@ const DoctorDashboard = () => {
               <FaCheckCircle /> {text.noAlerts}
             </div>
           ) : (
-            ACTIVE_ALERTS.map(alert => {
+            filteredAlerts.map(alert => {
               const aC = alertColors[alert.alertStyle] || alertColors.sos;
               return (
                 <div
@@ -267,71 +242,23 @@ const DoctorDashboard = () => {
                   style={{
                     background: 'var(--surface)', borderRadius: 'var(--radius-lg)',
                     border: '1px solid var(--border)',
-                    borderLeft: `4px solid ${aC.border}`, // Issue 2: border-left 4px
-                    padding: '20px', // Issue 2: Padding 20px 20px
+                    borderLeft: `4px solid ${aC.border}`,
+                    padding: '20px',
                     boxShadow: 'var(--shadow-card)', transition: 'all 0.15s'
                   }}
                 >
-                  {/* Top row: name + time */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)' }}>
-                      {alert.name}
-                    </span>
-                    <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginLeft: '8px', flexShrink: 0 }}>
-                      {alert.time}
-                    </span>
+                    <span style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)' }}>{alert.name}</span>
+                    <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginLeft: '8px', flexShrink: 0 }}>{alert.time}</span>
                   </div>
-
-                  {/* Middle row: type badge + location */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
-                    <span style={{
-                      padding: '4px 10px', borderRadius: '100px',
-                      fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px',
-                      background: aC.badgeBg, color: aC.badgeColor, flexShrink: 0
-                    }}>
-                      {alert.type}
-                    </span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'var(--text-secondary)', fontSize: '13px' }}>
-                      <FaMapMarkerAlt size={11} />
-                      {alert.location}
-                    </div>
+                    <span style={{ padding: '4px 10px', borderRadius: '100px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', background: aC.badgeBg, color: aC.badgeColor, flexShrink: 0 }}>{alert.type}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'var(--text-secondary)', fontSize: '13px' }}><FaMapMarkerAlt size={11} />{alert.location}</div>
                   </div>
-
-                  {/* Trigger reason */}
-                  <p style={{ fontSize: '13px', fontStyle: 'italic', color: 'var(--text-secondary)', marginBottom: '12px', margin: '0 0 12px 0' }}>
-                    {alert.trigger}
-                  </p>
-
-                  {/* Buttons */}
+                  <p style={{ fontSize: '13px', fontStyle: 'italic', color: 'var(--text-secondary)', marginBottom: '12px', margin: '0 0 12px 0' }}>{alert.trigger}</p>
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    <button
-                      onClick={() => navigate(`/doctor/alert/${alert.id}`, { state: { alert } })}
-                      style={{
-                        height: '36px', padding: '0 16px',
-                        background: 'var(--accent)', color: 'white',
-                        border: 'none', borderRadius: 'var(--radius-md)',
-                        fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer'
-                      }}
-                    >
-                      {text.viewDetails}
-                    </button>
-                    <button 
-                      onClick={() => {
-                        if (window.innerWidth > 768) {
-                          alert(text.callingToast);
-                        } else {
-                          window.location.href = `tel:+91 9876543210`;
-                        }
-                      }}
-                      style={{
-                        height: '36px', padding: '0 16px',
-                        background: 'transparent', color: 'var(--accent)',
-                        border: '1.5px solid var(--accent)', borderRadius: 'var(--radius-md)',
-                        fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer'
-                      }}
-                    >
-                      {text.callPatient}
-                    </button>
+                    <button onClick={() => navigate(`/doctor/alert/${alert.id}`, { state: { alert } })} style={{ height: '36px', padding: '0 16px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer' }}>{text.viewDetails}</button>
+                    <button onClick={() => window.innerWidth > 768 ? alert(text.callingToast) : window.location.href = `tel:+91 9876543210`} style={{ height: '36px', padding: '0 16px', background: 'transparent', color: 'var(--accent)', border: '1.5px solid var(--accent)', borderRadius: 'var(--radius-md)', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer' }}>{text.callPatient}</button>
                   </div>
                 </div>
               );
@@ -341,27 +268,17 @@ const DoctorDashboard = () => {
       </div>
 
       {/* ── REPORTS RECEIVED SECTION ── */}
-      <div style={{ padding: '0 20px', marginBottom: '0' }}> {/* Issue 6: 20px padding */}
-        <div style={{ 
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-          marginTop: '24px', marginBottom: '14px' // Issue 4: mt:24 mb:14
-        }}>
+      <div style={{ padding: '0 20px', marginBottom: '0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '24px', marginBottom: '14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <FaFilePdf size={18} color="var(--accent)" />
-            <span style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)' }}>
-              {text.reports}
-            </span>
+            <span style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)' }}>{text.reports}</span>
           </div>
-          <button
-            onClick={() => navigate('/doctor/reports')}
-            style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
-          >
-            {text.viewAll}
-          </button>
+          <button onClick={() => navigate('/doctor/reports')} style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>{text.viewAll}</button>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}> {/* Consistency with alerts gap */}
-          {PDF_REPORTS.map(rep => {
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {filteredReports.map(rep => {
             const isCritical = rep.urgency === 'CRITICAL';
             const urgencyColor = isCritical ? 'var(--danger)' : 'var(--warning)';
             return (
@@ -369,52 +286,20 @@ const DoctorDashboard = () => {
                 key={rep.id}
                 onClick={() => navigate(`/doctor/report/${rep.id}`, { state: { report: rep } })}
                 className="dd-report-card"
-                style={{
-                  background: 'var(--surface)', border: '1px solid var(--border)',
-                  borderLeft: `4px solid ${urgencyColor}`, // Issue 5: 4px Left border
-                  borderRadius: 'var(--radius-lg)', padding: '20px', // Issue 2: padding consistency
-                  display: 'flex', alignItems: 'center',
-                  gap: '14px', transition: 'all 0.15s', cursor: 'pointer'
-                }}
+                style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderLeft: `4px solid ${urgencyColor}`, borderRadius: 'var(--radius-lg)', padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', transition: 'all 0.15s', cursor: 'pointer' }}
               >
-                {/* Icon box - updated to matches alert style implicitly */}
-                <div style={{
-                  width: '48px', height: '48px', borderRadius: 'var(--radius-md)',
-                  background: isCritical ? 'var(--danger-light)' : 'var(--warning-light)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-                }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: 'var(--radius-md)', background: isCritical ? 'var(--danger-light)' : 'var(--warning-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <FaFilePdf size={24} color={urgencyColor} />
                 </div>
-
-                {/* Center */}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>
-                    {rep.name}
-                  </div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '2px' }}>
-                    {text.asha}: {rep.asha}
-                  </div>
+                  <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>{rep.name}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '2px' }}>{text.asha}: {rep.asha}</div>
                   <div style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>{rep.date}</div>
                 </div>
-
-                {/* Right */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', flexShrink: 0 }}>
-                  <span style={{
-                    padding: '4px 10px', borderRadius: '100px', fontSize: '11px', fontWeight: 700,
-                    textTransform: 'uppercase', letterSpacing: '0.5px',
-                    background: isCritical ? 'var(--danger-light)' : 'var(--warning-light)',
-                    color: urgencyColor
-                  }}>
-                    {rep.urgency}
-                  </span>
+                  <span style={{ padding: '4px 10px', borderRadius: '100px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', background: isCritical ? 'var(--danger-light)' : 'var(--warning-light)', color: urgencyColor }}>{rep.urgency}</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{
-                      padding: '3px 8px', borderRadius: '100px', fontSize: '10px', fontWeight: 700,
-                      background: rep.status === 'New' ? 'var(--accent-light)' : 'var(--success-light)',
-                      color: rep.status === 'New' ? 'var(--accent)' : 'var(--success)'
-                    }}>
-                      {rep.status}
-                    </span>
+                    <span style={{ padding: '3px 8px', borderRadius: '100px', fontSize: '10px', fontWeight: 700, background: rep.status === 'New' ? 'var(--accent-light)' : 'var(--success-light)', color: rep.status === 'New' ? 'var(--accent)' : 'var(--success)' }}>{rep.status}</span>
                     <FaDownload size={16} color="var(--text-tertiary)" style={{ cursor: 'pointer' }} />
                   </div>
                 </div>

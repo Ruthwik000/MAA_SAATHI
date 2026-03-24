@@ -25,13 +25,25 @@ const ROLE_CONFIG = {
     gradient: 'linear-gradient(160deg, rgba(243,229,245,0.85) 0%, rgba(250,245,255,0.7) 100%)',
     label: 'Mother Portal',
     subtitle: 'Track your health journey with care'
+  },
+  patient: {
+    gradient: 'linear-gradient(160deg, rgba(232,245,233,0.85) 0%, rgba(241,248,241,0.7) 100%)',
+    label: 'Patient Portal',
+    subtitle: 'Your personal health companion'
+  },
+  caretaker: {
+    gradient: 'linear-gradient(160deg, rgba(255,248,225,0.85) 0%, rgba(255,253,242,0.7) 100%)',
+    label: 'Caretaker Portal',
+    subtitle: 'Caring for your loved ones'
   }
 };
 
 const QUOTES = {
   asha: '"Every village deserves a healthcare hero."',
   doctor: '"Healing hands, caring hearts."',
-  mother: '"A mother\'s love is the heart of every home."'
+  mother: '"A mother\'s love is the heart of every home."',
+  patient: '"Health is the greatest wealth."',
+  caretaker: '"Caregiving is an act of love."'
 };
 
 const LoginScreen = () => {
@@ -42,6 +54,7 @@ const LoginScreen = () => {
   const { loginWithGoogle } = useAuth();
 
   const initialRole = location.state?.role || 'asha';
+  const initialType = location.state?.type || '';
   const [role, setRole] = useState(initialRole);
   const [loading, setLoading] = useState(false);
 
@@ -58,13 +71,32 @@ const LoginScreen = () => {
     try {
       const result = await loginWithGoogle();
       if (result.isNewUser) {
-        navigate('/role-setup', { state: { preSelectedRole: role } });
+        // Pass both role and type to role setup
+        navigate('/role-setup', { state: { preSelectedRole: role, preSelectedType: initialType } });
       } else {
-        switch (result.profile.role) {
-          case 'asha': navigate('/asha/dashboard'); break;
-          case 'doctor': navigate('/doctor/dashboard'); break;
-          case 'mother': navigate('/mother/dashboard'); break;
-          default: navigate('/welcome');
+        const userRole = result.profile.role;
+        const patientType = result.profile.patientType || initialType;
+
+        if (userRole === 'asha') {
+          navigate('/asha/dashboard');
+        } else if (userRole === 'doctor') {
+          navigate('/doctor/dashboard');
+        } else if (userRole === 'mother') {
+          navigate('/mother/dashboard');
+        } else if (userRole === 'patient') {
+          if (patientType === 'elderly') {
+            const hasSurvey = result.profile.elderlyHealthProfile && Object.keys(result.profile.elderlyHealthProfile).length > 0;
+            navigate(hasSurvey ? '/dashboard/elderly' : '/elderly/health-survey');
+          } else if (patientType === 'wellness') {
+            const hasSurvey = result.profile.wellnessProfile && Object.keys(result.profile.wellnessProfile).length > 0;
+            navigate(hasSurvey ? '/dashboard/wellness' : '/wellness/health-survey');
+          } else {
+            navigate('/welcome');
+          }
+        } else if (userRole === 'caretaker') {
+          navigate('/caretaker-type');
+        } else {
+          navigate('/welcome');
         }
       }
     } catch (err) {
@@ -267,27 +299,32 @@ const LoginScreen = () => {
             borderRadius: '30px',
             padding: '4px',
             marginBottom: '32px',
-            gap: '4px'
+            gap: '4px',
+            overflowX: 'auto',
+            scrollbarWidth: 'none'
           }}>
-            {['asha', 'doctor', 'mother'].map((r) => (
+            {['asha', 'doctor', 'mother', 'patient', 'caretaker'].map((r) => (
               <button
                 key={r}
                 onClick={() => setRole(r)}
                 style={{
-                  flex: 1,
+                  flex: '0 0 auto',
+                  minWidth: '70px',
                   height: '38px',
+                  padding: '0 12px',
                   borderRadius: '26px',
                   border: 'none',
                   backgroundColor: role === r ? '#C2185B' : 'transparent',
                   color: role === r ? '#FFFFFF' : 'var(--text-secondary)',
-                  fontSize: '13px',
+                  fontSize: '12px',
                   fontWeight: 700,
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
-                  letterSpacing: '0.3px'
+                  letterSpacing: '0.3px',
+                  whiteSpace: 'nowrap'
                 }}
               >
-                {roleLabel[r]}
+                {roleLabel[r] || r.charAt(0).toUpperCase() + r.slice(1)}
               </button>
             ))}
           </div>
@@ -330,6 +367,12 @@ const LoginScreen = () => {
               if (role === 'asha') navigate('/asha/dashboard');
               if (role === 'doctor') navigate('/doctor/dashboard');
               if (role === 'mother') navigate('/mother/dashboard');
+              if (role === 'caretaker') navigate('/caretaker-type');
+              if (role === 'patient') {
+                if (initialType === 'elderly') navigate('/elderly/health-survey');
+                else if (initialType === 'wellness') navigate('/wellness/health-survey');
+                else navigate('/patient-type-select');
+              }
             }}
             style={{
               width: '100%',

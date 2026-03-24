@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaHeartbeat } from 'react-icons/fa';
+import { FaHeartbeat, FaUserNurse, FaUserFriends } from 'react-icons/fa';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -14,6 +14,7 @@ const WelcomeScreen = () => {
   const { theme, toggleTheme } = useTheme();
   const { language, toggleLanguage } = useLanguage();
   const t = useTranslation();
+  const [showCaretakerTypes, setShowCaretakerTypes] = React.useState(false);
 
   const handleLogin = (role) => {
     navigate('/login', { state: { role } });
@@ -158,60 +159,127 @@ const WelcomeScreen = () => {
              </p>
           </div>
 
-          {/* Buttons */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '32px' }}>
+           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '32px' }}>
              <button 
-               onClick={() => handleLogin('asha')}
+               onClick={() => navigate('/login', { state: { role: 'doctor' } })}
                style={{
                  width: '100%',
                  height: '52px',
-                 backgroundColor: '#C2185B',
-                 color: '#FFFFFF',
+                 backgroundColor: 'var(--accent)',
+                 color: 'white',
                  border: 'none',
-                 borderRadius: '10px',
+                 borderRadius: 'var(--radius-md)',
                  fontSize: '15px',
                  fontWeight: 600,
                  cursor: 'pointer',
                  transition: 'all 0.2s ease'
                }}
              >
-               {t.auth.loginAsAsha}
+               Login as Doctor
              </button>
              <button 
-               onClick={() => handleLogin('doctor')}
+               onClick={() => navigate('/patient-type-select')}
                style={{
                  width: '100%',
                  height: '52px',
                  backgroundColor: 'transparent',
-                 color: '#C2185B',
-                 border: '1.5px solid #C2185B',
-                 borderRadius: '10px',
+                 color: 'var(--accent)',
+                 border: '1.5px solid var(--accent)',
+                 borderRadius: 'var(--radius-md)',
                  fontSize: '15px',
                  fontWeight: 600,
                  cursor: 'pointer',
                  transition: 'all 0.2s ease'
                }}
              >
-               {t.auth.loginAsDoctor}
+               Login as Patient
              </button>
-             <button 
-               onClick={() => navigate('/mother-entry')}
-               style={{
-                 width: '100%',
-                 height: '52px',
-                 backgroundColor: 'var(--bg-secondary)',
-                 color: 'var(--text-primary)',
-                 border: '1.5px solid var(--border)',
-                 borderRadius: '10px',
-                 fontSize: '15px',
-                 fontWeight: 600,
-                 cursor: 'pointer',
-                 transition: 'all 0.2s ease'
-               }}
-             >
-               {t.auth.iAmMother}
-             </button>
-          </div>
+             
+             {!showCaretakerTypes ? (
+               <button 
+                 onClick={() => setShowCaretakerTypes(true)}
+                 style={{
+                   width: '100%',
+                   height: '52px',
+                   backgroundColor: 'var(--bg-secondary)',
+                   color: 'var(--text-primary)',
+                   border: '1.5px solid var(--border)',
+                   borderRadius: 'var(--radius-md)',
+                   fontSize: '15px',
+                   fontWeight: 600,
+                   cursor: 'pointer',
+                   transition: 'all 0.2s ease'
+                 }}
+               >
+                 Login as Caretaker
+               </button>
+             ) : (
+               <motion.div 
+                 initial={{ opacity: 0, y: -10 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+               >
+                 <button 
+                   onClick={() => navigate('/login', { state: { role: 'asha' } })}
+                   style={{
+                     width: '100%',
+                     height: '52px',
+                     backgroundColor: 'var(--bg-secondary)',
+                     color: 'var(--text-primary)',
+                     border: '1.5px solid var(--border)',
+                     borderRadius: 'var(--radius-md)',
+                     fontSize: '15px',
+                     fontWeight: 600,
+                     cursor: 'pointer',
+                     display: 'flex',
+                     alignItems: 'center',
+                     justifyContent: 'center',
+                     gap: '12px',
+                     transition: 'all 0.2s ease'
+                   }}
+                 >
+                   <FaUserNurse size={18} color="var(--accent)" />
+                   ASHA Worker
+                 </button>
+                 <button 
+                   onClick={() => navigate('/login', { state: { role: 'caretaker' } })}
+                   style={{
+                     width: '100%',
+                     height: '52px',
+                     backgroundColor: 'var(--bg-secondary)',
+                     color: 'var(--text-primary)',
+                     border: '1.5px solid var(--border)',
+                     borderRadius: 'var(--radius-md)',
+                     fontSize: '15px',
+                     fontWeight: 600,
+                     cursor: 'pointer',
+                     display: 'flex',
+                     alignItems: 'center',
+                     justifyContent: 'center',
+                     gap: '12px',
+                     transition: 'all 0.2s ease'
+                   }}
+                 >
+                   <FaUserFriends size={18} color="var(--accent)" />
+                   Family Member
+                 </button>
+                 <button 
+                   onClick={() => setShowCaretakerTypes(false)}
+                   style={{ 
+                     background: 'none', 
+                     border: 'none', 
+                     color: 'var(--text-tertiary)', 
+                     fontSize: '12px', 
+                     fontWeight: 600, 
+                     cursor: 'pointer',
+                     marginTop: '4px'
+                   }}
+                 >
+                   ← Back
+                 </button>
+               </motion.div>
+             )}
+           </div>
           
         </div>
       </div>

