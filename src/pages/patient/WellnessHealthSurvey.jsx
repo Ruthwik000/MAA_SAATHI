@@ -176,11 +176,44 @@ const WellnessHealthSurvey = () => {
         .opt-indicator { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
         .opt-btn[data-selected="true"] .opt-indicator { background: var(--accent); border-color: var(--accent); }
         .other-textarea { width: 100%; min-height: 80px; background: var(--surface); border: 1.5px solid var(--accent); border-radius: var(--radius-md); padding: 12px 52px 12px 16px; font-family: inherit; font-size: 15px; color: var(--text-primary); resize: vertical; box-sizing: border-box; outline: none; margin-top: 10px; }
-        .generate-btn { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); width: calc(100% - 40px); max-width: 720px; height: 52px; border: none; border-radius: var(--radius-md); font-family: inherit; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; background: var(--border); color: var(--text-tertiary); cursor: not-allowed; z-index: 100; }
+        .generate-btn { 
+          position: fixed; 
+          bottom: calc(24px + env(safe-area-inset-bottom)); 
+          left: 50%; 
+          transform: translateX(-50%); 
+          width: calc(100% - 40px); 
+          max-width: 720px; 
+          height: 52px; 
+          border: none; 
+          border-radius: var(--radius-md); 
+          font-family: inherit; 
+          font-size: 16px; 
+          font-weight: 600; 
+          display: flex; 
+          align-items: center; 
+          justify-content: center; 
+          gap: 8px; 
+          transition: all 0.2s; 
+          background: var(--border); 
+          color: var(--text-tertiary); 
+          cursor: not-allowed; 
+          z-index: 100; 
+        }
         .generate-btn.active { background: var(--accent); color: white; box-shadow: 0 4px 20px rgba(194,24,91,0.35); cursor: pointer; }
       `}} />
 
-      <header style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)', padding: '16px 24px', position: 'sticky', top: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <header style={{ 
+        background: 'var(--surface)', 
+        borderBottom: '1px solid var(--border)', 
+        padding: '16px 24px', 
+        paddingTop: 'calc(16px + env(safe-area-inset-top))',
+        position: 'sticky', 
+        top: 0, 
+        zIndex: 50, 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between' 
+      }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button onClick={() => navigate(-1)} style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--bg-secondary)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
             <FaArrowLeft size={16} color="var(--text-primary)" />
@@ -193,7 +226,7 @@ const WellnessHealthSurvey = () => {
         </div>
       </header>
 
-      <div style={{ padding: '16px 24px', background: 'var(--accent-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="px-mobile-16" style={{ padding: '16px 24px', background: 'var(--accent-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent)' }}>{t.subtitle}</span>
         <div style={{ padding: '4px 12px', background: 'var(--surface)', borderRadius: '100px', fontSize: '12px', fontWeight: 600 }}>{t.progress(answeredCount, t.questions.length)}</div>
       </div>
@@ -206,27 +239,27 @@ const WellnessHealthSurvey = () => {
         {t.questions.map((q, idx) => {
           const qKey = `q${idx}`;
           return (
-            <div key={idx} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: '24px', margin: '0 20px 20px 20px' }}>
+            <div key={idx} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: '20px', margin: '0 16px 16px 16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
-                <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <q.icon size={24} color={q.color} />
+                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <q.icon size={18} color={q.color} />
                 </div>
                 <div>
-                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase' }}>Question {idx + 1}</div>
-                  <div style={{ fontSize: '17px', fontWeight: 600 }}>{q.text}</div>
+                  <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase' }}>Question {idx + 1}</div>
+                  <div style={{ fontSize: '16px', fontWeight: 600, lineHeight: 1.3 }}>{q.text}</div>
                 </div>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {q.options.map((opt, oIdx) => (
-                  <button key={oIdx} className="opt-btn" onClick={() => setAnswers(prev => ({...prev, [qKey]: oIdx}))} data-selected={answers[qKey] === oIdx}>
-                    <div className="opt-indicator">{answers[qKey] === oIdx && <FaCheck size={12} color="white" />}</div>
-                    <span>{opt}</span>
+                  <button key={oIdx} className="opt-btn" onClick={() => setAnswers(prev => ({...prev, [qKey]: oIdx}))} data-selected={answers[qKey] === oIdx} style={{ padding: '12px 16px' }}>
+                    <div className="opt-indicator">{answers[qKey] === oIdx && <FaCheck size={10} color="white" />}</div>
+                    <span style={{ fontSize: '14px' }}>{opt}</span>
                   </button>
                 ))}
                 {/* Simplified: Wellness survey might also need 'Other' for conditions/goals */}
-                <button className="opt-btn" onClick={() => setAnswers(prev => ({...prev, [qKey]: 'other'}))} data-selected={answers[qKey] === 'other'}>
-                  <div className="opt-indicator">{answers[qKey] === 'other' && <FaCheck size={12} color="white" />}</div>
-                  <span>Other (Type below)</span>
+                <button className="opt-btn" onClick={() => setAnswers(prev => ({...prev, [qKey]: 'other'}))} data-selected={answers[qKey] === 'other'} style={{ padding: '12px 16px' }}>
+                  <div className="opt-indicator">{answers[qKey] === 'other' && <FaCheck size={10} color="white" />}</div>
+                  <span style={{ fontSize: '14px' }}>Other (Type below)</span>
                 </button>
                 {answers[qKey] === 'other' && (
                   <div style={{ position: 'relative' }}>

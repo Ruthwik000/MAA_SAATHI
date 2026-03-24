@@ -120,27 +120,41 @@ const DoctorDashboard = () => {
 
   return (
     <DoctorLayout>
-      <div style={{ background: themeColors.bg, minHeight: '100vh', fontFamily: '"Manrope", "Inter", sans-serif', color: themeColors.textMain }}>
+      <div style={{ background: themeColors.bg, minHeight: '100dvh', fontFamily: '"Manrope", "Inter", sans-serif', color: themeColors.textMain, overflowX: 'hidden' }}>
+        <style dangerouslySetInnerHTML={{ __html: `
+          @media (max-width: 1024px) {
+            .doctor-header { padding: 16px 20px !important; }
+            .doctor-main { padding: 24px 20px !important; }
+            .doctor-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+            .doctor-filter-bar { flex-direction: column !important; gap: 24px !important; }
+            .doctor-stats { justify-content: flex-start !important; width: 100% !important; }
+          }
+          @media (max-width: 640px) {
+            .doctor-filters { overflow-x: auto !important; padding-bottom: 8px !important; width: 100% !important; }
+            .filter-btn { white-space: nowrap !important; }
+          }
+        `}} />
         
-        <header style={{ 
+        <header className="doctor-header" style={{ 
           background: themeColors.surface, borderBottom: `1px solid ${themeColors.surfaceHigh}`, 
           padding: '24px 40px', position: 'sticky', top: 0, zIndex: 100,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          paddingTop: 'calc(24px + env(safe-area-inset-top))'
         }}>
           <div>
-            <div style={{ fontSize: '13px', fontWeight: 600, color: themeColors.textTertiary, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 600, color: themeColors.textTertiary, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '2px' }}>
               {phcName} PHC • Active
             </div>
-            <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0 }}>Dr. {drName}</h1>
+            <h1 style={{ fontSize: '20px', fontWeight: 800, margin: 0 }}>Dr. {drName}</h1>
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <div style={{ display: 'flex', background: themeColors.surfaceLow, borderRadius: '100px', padding: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', background: themeColors.surfaceLow, borderRadius: '100px', padding: '3px' }}>
               {['en', 'te'].map(l => (
                 <button 
                   key={l} onClick={() => toggleLanguage(l)}
                   style={{ 
-                    padding: '8px 16px', borderRadius: '100px', fontSize: '12px', fontWeight: 700, border: 'none',
+                    padding: '6px 14px', borderRadius: '100px', fontSize: '11px', fontWeight: 700, border: 'none',
                     background: language === l ? themeColors.primary : 'transparent',
                     color: language === l ? 'white' : themeColors.textMuted, cursor: 'pointer'
                   }}
@@ -152,22 +166,23 @@ const DoctorDashboard = () => {
           </div>
         </header>
 
-        <main style={{ padding: '40px', maxWidth: '1400px', margin: '0 auto' }}>
+        <main className="doctor-main" style={{ padding: '40px', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
           
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '48px' }}>
-            <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="doctor-filter-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', gap: '24px' }}>
+            <div className="doctor-filters" style={{ display: 'flex', gap: '8px' }}>
               {[
                 {id: 'All', l: text.all}, {id: 'mother', l: text.mothers}, 
                 {id: 'elderly', l: text.elderly}, {id: 'wellness', l: text.wellness}
               ].map(f => (
                 <button 
                   key={f.id} onClick={() => setActiveFilter(f.id)}
+                  className="filter-btn"
                   style={{ 
-                    padding: '10px 24px', borderRadius: '14px', fontSize: '14px', fontWeight: 700,
+                    padding: '10px 20px', borderRadius: '14px', fontSize: '13px', fontWeight: 700,
                     border: 'none', transition: 'all 0.2s', cursor: 'pointer',
                     background: activeFilter === f.id ? themeColors.primary : themeColors.surface,
                     color: activeFilter === f.id ? 'white' : themeColors.textMuted,
-                    boxShadow: activeFilter === f.id ? `0 8px 16px ${themeColors.primary}20` : 'none'
+                    boxShadow: activeFilter === f.id ? `0 8px 16px ${themeColors.primary}15` : 'none'
                   }}
                 >
                   {f.l}
@@ -175,19 +190,19 @@ const DoctorDashboard = () => {
               ))}
             </div>
 
-            <div style={{ display: 'flex', gap: '24px' }}>
+            <div className="doctor-stats" style={{ display: 'flex', gap: '24px' }}>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: themeColors.primary }}>{filteredAlerts.length}</div>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: themeColors.textTertiary, textTransform: 'uppercase' }}>{text.pending}</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: themeColors.primary }}>{filteredAlerts.length}</div>
+                <div style={{ fontSize: '10px', fontWeight: 700, color: themeColors.textTertiary, textTransform: 'uppercase' }}>{text.pending}</div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: themeColors.success }}>{filteredReports.length}</div>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: themeColors.textTertiary, textTransform: 'uppercase' }}>{text.received}</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: themeColors.success }}>{filteredReports.length}</div>
+                <div style={{ fontSize: '10px', fontWeight: 700, color: themeColors.textTertiary, textTransform: 'uppercase' }}>{text.received}</div>
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '60px' }}>
+          <div className="doctor-grid" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '60px' }}>
             
             <section>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>

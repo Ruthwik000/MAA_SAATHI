@@ -154,16 +154,17 @@ const AshaDashboard = () => {
 
         @media (max-width: 768px) {
           .asha-sidebar { display: none !important; }
-          .asha-main { margin-left: 0; padding: 20px 16px; padding-bottom: 96px; }
+          .asha-main { margin-left: 0 !important; padding: 20px 16px !important; padding-bottom: 120px !important; }
           .asha-bottom-nav { 
-            display: flex; 
-            position: fixed; 
-            bottom: 0; left: 0; right: 0; 
-            background: var(--surface); 
-            border-top: 1px solid var(--border); 
-            padding: 12px 16px; 
-            justify-content: space-around; 
-            z-index: 50; 
+            display: flex !important; 
+            position: fixed !important; 
+            bottom: 0 !important; left: 0 !important; right: 0 !important; 
+            background: var(--surface) !important; 
+            border-top: 1px solid var(--border) !important; 
+            padding: 12px 16px !important;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+            justify-content: space-around !important; 
+            z-index: 50 !important; 
           }
           .bottom-nav-item {
             display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -172,10 +173,11 @@ const AshaDashboard = () => {
           .bottom-nav-item.active { color: var(--accent); }
           .bottom-nav-item svg { font-size: 22px; color: inherit; }
           .bottom-nav-item span { font-size: 10px; font-weight: 500; }
-          .stat-card-row { grid-template-columns: 1fr; }
-          .quick-action-row { grid-template-columns: repeat(2, 1fr); }
-          header { flex-direction: column; gap: 20px; }
-          .header-right { align-self: flex-end; }
+          .stat-card-row { grid-template-columns: 1fr !important; }
+          .quick-action-row { grid-template-columns: repeat(2, 1fr) !important; }
+          header { flex-direction: column !important; gap: 20px !important; align-items: flex-start !important; }
+          .asha-greeting { font-size: 26px !important; }
+          .header-right { align-self: flex-end !important; }
         }
       `}} />
 
@@ -228,7 +230,7 @@ const AshaDashboard = () => {
           {/* Left Side */}
           <div>
             <div style={{ fontSize: '13px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-tertiary)', marginBottom: '6px' }}>{dynamicDate}</div>
-            <div style={{ fontSize: '36px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.5px', lineHeight: 1.1 }}>{t.dashboard.greeting(ashaName)}</div>
+            <div className="asha-greeting" style={{ fontSize: '36px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.5px', lineHeight: 1.1 }}>{t.dashboard.greeting(ashaName)}</div>
             <div style={{ fontSize: '15px', fontWeight: 400, color: 'var(--text-secondary)', marginTop: '6px' }}>{t.dashboard.visitsToday(4)}</div>
           </div>
           

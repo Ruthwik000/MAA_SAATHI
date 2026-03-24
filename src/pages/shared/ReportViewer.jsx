@@ -31,7 +31,16 @@ const ReportViewer = () => {
   if (!report) return null;
 
   return (
-    <div style={{ background: 'var(--bg-secondary)', minHeight: '100vh', padding: '16px', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box' }}>
+    <div style={{ 
+      background: 'var(--bg-secondary)', 
+      minHeight: '100dvh', 
+      padding: '16px', 
+      paddingTop: 'calc(16px + env(safe-area-inset-top))',
+      paddingBottom: 'calc(40px + env(safe-area-inset-bottom))',
+      fontFamily: '"DM Sans", sans-serif', 
+      boxSizing: 'border-box',
+      overflowX: 'hidden'
+    }}>
       <header style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px', maxWidth: '800px', margin: '0 auto 32px auto' }}>
         <button 
           onClick={() => navigate(-1)}

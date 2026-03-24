@@ -18,15 +18,18 @@ const DoctorLayout = ({ children }) => {
       minHeight: '100dvh',
       background: 'var(--bg-secondary)',
       fontFamily: '"DM Sans", sans-serif',
-      paddingBottom: '96px' // Issue 8: bottom padding
+      paddingBottom: 'calc(96px + env(safe-area-inset-bottom))',
+      paddingTop: 'env(safe-area-inset-top)',
+      paddingLeft: 'env(safe-area-inset-left)',
+      paddingRight: 'env(safe-area-inset-right)'
     }}>
       {/* Main content area */}
       {children}
 
-      {/* ── Issue 1: Floating pill bottom nav ── */}
+      {/* ── Floating pill bottom nav ── */}
       <div style={{
         position: 'fixed', 
-        bottom: '16px',
+        bottom: 'calc(16px + env(safe-area-inset-bottom))',
         left: '24px', 
         right: '24px', 
         zIndex: 100, 

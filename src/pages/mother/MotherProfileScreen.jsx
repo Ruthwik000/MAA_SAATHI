@@ -247,7 +247,8 @@ const MotherProfileScreen = () => {
       <header style={{
         background: 'var(--surface)', borderBottom: '1px solid var(--border)',
         padding: '16px 24px', position: 'sticky', top: 0, zIndex: 50,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        paddingTop: 'calc(16px + env(safe-area-inset-top))'
       }}>
         <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
           {text.title}
@@ -269,7 +270,7 @@ const MotherProfileScreen = () => {
       </header>
 
       {/* ── HERO SECTION ── */}
-      <div style={{
+      <div className="px-mobile-16" style={{
         background: 'var(--surface)', borderBottom: '1px solid var(--border)',
         padding: '28px 24px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '20px'
       }}>
@@ -323,7 +324,7 @@ const MotherProfileScreen = () => {
       </div>
 
       {/* ── PERSONAL DETAILS CARD ── */}
-      <div style={cardStyle}>
+      <div className="px-mobile-16" style={cardStyle}>
         <div style={headerStyle}>
           <FaUser size={16} color="var(--accent)" />
           <span style={{ fontSize: '15px', fontWeight: 600 }}>{text.personal}</span>
@@ -366,7 +367,7 @@ const MotherProfileScreen = () => {
       </div>
 
       {/* ── PREGNANCY DETAILS CARD ── */}
-      <div style={cardStyle}>
+      <div className="px-mobile-16" style={cardStyle}>
         <div style={headerStyle}>
           <FaBabyCarriage size={16} color="var(--accent)" />
           <span style={{ fontSize: '15px', fontWeight: 600 }}>{text.pregnancy}</span>
@@ -392,7 +393,7 @@ const MotherProfileScreen = () => {
       </div>
 
       {/* ── RING INFORMATION CARD ── */}
-      <div style={{ ...cardStyle, padding: '20px 24px' }}>
+      <div className="px-mobile-16" style={{ ...cardStyle, padding: '20px 24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
           <FaBroadcastTower size={16} color="var(--success)" />
           <span style={{ fontSize: '15px', fontWeight: 600 }}>{text.ring}</span>
@@ -434,7 +435,7 @@ const MotherProfileScreen = () => {
       </div>
 
       {/* ── BUTTONS ── */}
-      <div style={{ padding: '0 24px 24px 24px' }}>
+      <div className="px-mobile-16" style={{ padding: '0 24px 24px 24px' }}>
         <button 
           onClick={() => navigate('/mother/health-history')}
           style={{
@@ -467,7 +468,9 @@ const MotherProfileScreen = () => {
         <div style={{
           position: 'fixed', bottom: 0, left: 0, right: 0,
           background: 'var(--surface)', borderTop: '1px solid var(--border)',
-          padding: '16px 24px 24px 24px', zIndex: 100,
+          padding: '16px 24px', 
+          paddingBottom: 'calc(16px + env(safe-area-inset-bottom))',
+          zIndex: 100,
           display: 'flex', flexDirection: 'column', gap: '10px'
         }}>
           <button 

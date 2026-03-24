@@ -148,11 +148,12 @@ const MotherDashboard = () => {
         ...card, borderLeft: 'none', borderRight: 'none', borderTop: 'none',
         borderRadius: 0, padding: '16px 24px',
         position: 'sticky', top: 0, zIndex: 50,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        paddingTop: 'calc(16px + env(safe-area-inset-top))'
       }}>
         <div>
-          <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.2 }}> Namaste, {name} 👋 </div>
-          <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}> {text.subtitle} </div>
+          <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.2 }}> Namaste, {name} 👋 </div>
+          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}> {text.subtitle} </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
@@ -178,7 +179,7 @@ const MotherDashboard = () => {
         </div>
       </header>
 
-      <div style={{ margin: '16px 24px 0 24px', ...card, padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="px-mobile-16" style={{ margin: '16px 24px 0 24px', ...card, padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ width: '44px', height: '44px', borderRadius: '50%', flexShrink: 0, background: RING_CONNECTED ? 'var(--success-light)' : 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <FaBroadcastTower size={20} color={RING_CONNECTED ? 'var(--success)' : 'var(--text-tertiary)'} />
@@ -201,7 +202,7 @@ const MotherDashboard = () => {
         )}
       </div>
 
-      <div style={{ padding: '16px 24px 0 24px' }}>
+      <div className="px-mobile-16" style={{ padding: '16px 24px 0 24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <FaHeartbeat size={18} color="var(--danger)" />
@@ -236,7 +237,7 @@ const MotherDashboard = () => {
         </div>
       </div>
 
-      <div style={{ padding: '16px 24px 0 24px' }}>
+      <div className="px-mobile-16" style={{ padding: '16px 24px 0 24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
           <FaFilePdf size={18} color="var(--accent)" />
           <span style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)' }}>{text.reports}</span>
@@ -282,7 +283,7 @@ const MotherDashboard = () => {
         </div>
       </div>
 
-      <div style={{ padding: '16px 24px 0 24px' }}>
+      <div className="px-mobile-16" style={{ padding: '16px 24px 0 24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <FaClipboardList size={18} color="var(--accent)" />
@@ -318,7 +319,7 @@ const MotherDashboard = () => {
         })}
       </div>
 
-      <div style={{ padding: '16px 24px 80px 24px' }}>
+      <div className="px-mobile-16" style={{ padding: '16px 24px 80px 24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
           <FaUserNurse size={18} color="var(--accent)" />
           <span style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)' }}>{text.worker}</span>

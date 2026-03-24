@@ -19,25 +19,23 @@ const WelcomeScreen = () => {
     <div style={{ display: 'flex', minHeight: '100dvh', background: '#FFFFFF', fontFamily: '"DM Sans", sans-serif', overflow: 'hidden' }}>
       <style dangerouslySetInnerHTML={{ __html: `
         @media (max-width: 960px) {
-          .main-wrapper { 
-            flex-direction: column !important; 
-            overflow: auto !important; 
-            height: auto !important;
-          }
+          .main-wrapper { flex-direction: column !important; overflow-y: auto !important; height: auto !important; overflow-x: hidden !important; }
           .hero-side { 
             position: relative !important; 
             width: 100% !important; 
-            height: 480px !important; 
+            height: 280px !important; 
+            padding-top: env(safe-area-inset-top) !important;
             mask-image: linear-gradient(to bottom, black 90%, transparent 100%) !important;
             -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%) !important;
           }
           .form-side { 
             width: 100% !important; 
-            padding: 40px 24px !important; 
+            padding: 32px 20px !important; 
             height: auto !important;
             overflow: visible !important;
+            padding-bottom: calc(40px + env(safe-area-inset-bottom)) !important;
           }
-          .welcome-title { font-size: 36px !important; }
+          .welcome-title p { font-size: 32px !important; letter-spacing: -1px !important; }
         }
         
         .action-button {

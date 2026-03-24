@@ -129,17 +129,25 @@ const ElderlyDashboard = () => {
 
   return (
     <PatientLayout patientType="elderly">
-      <header style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)', padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <header style={{ 
+        background: 'var(--surface)', 
+        borderBottom: '1px solid var(--border)', 
+        padding: '16px 24px', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between',
+        paddingTop: 'calc(16px + env(safe-area-inset-top))'
+      }}>
         <div>
-          <div style={{ fontSize: '24px', fontWeight: 800 }}>Namaste, {name} 👋</div>
+          <div style={{ fontSize: '20px', fontWeight: 800 }}>Namaste, {name} 👋</div>
           <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{text.subtitle}</div>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button onClick={() => toggleLanguage(language === 'en' ? 'te' : 'en')} style={{ padding: '6px 12px', borderRadius: '100px', border: '1px solid var(--border)', fontWeight: 600, cursor: 'pointer', background: 'transparent' }}>{language.toUpperCase()}</button>
+          <button onClick={() => toggleLanguage(language === 'en' ? 'te' : 'en')} style={{ padding: '6px 12px', borderRadius: '100px', border: '1px solid var(--border)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', background: 'transparent' }}>{language.toUpperCase()}</button>
         </div>
       </header>
 
-      <div style={{ padding: '24px', background: 'var(--bg-secondary)' }}>
+      <div className="px-mobile-16" style={{ padding: '24px', background: 'var(--bg-secondary)' }}>
         <div style={{ 
           background: aiStatus === 'CRITICAL' ? 'var(--danger-light)' : aiStatus === 'MODERATE' ? 'var(--warning-light)' : 'var(--success-light)',
           border: `2px solid ${aiStatus === 'CRITICAL' ? 'var(--danger)' : aiStatus === 'MODERATE' ? 'var(--warning)' : 'var(--success)'}`,
@@ -163,23 +171,23 @@ const ElderlyDashboard = () => {
         </div>
       </div>
 
-      <div style={{ padding: '0 24px' }}>
+      <div className="px-mobile-16" style={{ padding: '0 24px' }}>
         <div style={{ fontSize: '18px', fontWeight: 700, marginBottom: '14px', color: 'var(--text-primary)' }}>{text.vitals}</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
           <div style={{ background: 'var(--surface)', padding: '20px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', textAlign: 'center' }}>
             <FaHeartbeat color="var(--danger)" size={24} style={{ marginBottom: '8px' }} />
-            <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 700 }}>HEART RATE</div>
-            <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--danger)' }}>{currentHr} <span style={{ fontSize: '12px' }}>bpm</span></div>
+            <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', fontWeight: 700 }}>HEART RATE</div>
+            <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--danger)' }}>{currentHr} <span style={{ fontSize: '12px' }}>bpm</span></div>
           </div>
           <div style={{ background: 'var(--surface)', padding: '20px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', textAlign: 'center' }}>
             <FaLungs color="var(--info)" size={24} style={{ marginBottom: '8px' }} />
-            <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 700 }}>OXYGEN (SPO2)</div>
-            <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--info)' }}>{currentSpo2}%</div>
+            <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', fontWeight: 700 }}>OXYGEN (SPO2)</div>
+            <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--info)' }}>{currentSpo2}%</div>
           </div>
         </div>
       </div>
 
-      <div style={{ margin: '24px', padding: '20px', background: 'var(--surface)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border)' }}>
+      <div className="px-mobile-16" style={{ margin: '24px', padding: '20px', background: 'var(--surface)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
           <FaChartLine color="var(--accent)" />
           <span style={{ fontSize: '16px', fontWeight: 700 }}>{text.analytics}</span>
@@ -198,7 +206,7 @@ const ElderlyDashboard = () => {
       </div>
 
       {/* ACTION CLUSTER */}
-      <div style={{ padding: '0 24px 80px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div className="px-mobile-16" style={{ padding: '0 24px 80px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <button 
               onClick={() => generatePDF('instant', 'download')}

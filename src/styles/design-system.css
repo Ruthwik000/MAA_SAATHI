@@ -177,7 +177,17 @@ h3 { font-size: calc(22px * var(--font-scale)); }
 .gap-16 { gap: 16px; }
 .gap-24 { gap: 24px; }
 .w-full { width: 100%; }
+.max-w-full { max-width: 100%; }
 .min-h-screen { min-height: 100dvh; }
+
+/* Responsive Spacing (Overridable) */
+@media (max-width: 640px) {
+  .p-mobile-16 { padding: 16px !important; }
+  .p-mobile-20 { padding: 20px !important; }
+  .px-mobile-16 { padding-left: 16px !important; padding-right: 16px !important; }
+  .m-mobile-t-16 { margin-top: 16px !important; }
+}
+
 .m-t-24 { margin-top: 24px; }
 .m-b-40 { margin-bottom: 40px; }
 .mx-auto { margin-left: auto; margin-right: auto; }

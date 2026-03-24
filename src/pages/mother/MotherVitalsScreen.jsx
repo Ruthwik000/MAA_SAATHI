@@ -45,7 +45,8 @@ const MotherVitalsScreen = () => {
       <header style={{
         background: 'var(--surface)', borderBottom: '1px solid var(--border)',
         padding: '16px 24px', position: 'sticky', top: 0, zIndex: 50,
-        display: 'flex', alignItems: 'center', gap: '12px'
+        display: 'flex', alignItems: 'center', gap: '12px',
+        paddingTop: 'calc(16px + env(safe-area-inset-top))'
       }}>
         <button
           onClick={() => navigate(-1)}
@@ -62,7 +63,7 @@ const MotherVitalsScreen = () => {
         </span>
       </header>
 
-      <div style={{ padding: '20px 24px' }}>
+      <div className="px-mobile-16" style={{ padding: '20px 24px' }}>
         
         {/* ── FILTER PILLS ── */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>

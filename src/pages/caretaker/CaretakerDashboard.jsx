@@ -52,9 +52,17 @@ const CaretakerDashboard = () => {
 
   return (
     <PatientLayout role="caretaker">
-      <header style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)', padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <header style={{ 
+        background: 'var(--surface)', 
+        borderBottom: '1px solid var(--border)', 
+        padding: '16px 24px', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between',
+        paddingTop: 'calc(16px + env(safe-area-inset-top))'
+      }}>
         <div>
-          <div style={{ fontSize: '24px', fontWeight: 800 }}>Welcome, {name} 👋</div>
+          <div style={{ fontSize: '20px', fontWeight: 800 }}>Welcome, {name} 👋</div>
           <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{text.subtitle}</div>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
@@ -64,7 +72,7 @@ const CaretakerDashboard = () => {
         </div>
       </header>
 
-      <div style={{ padding: '20px 24px' }}>
+      <div className="px-mobile-16" style={{ padding: '20px 24px' }}>
         <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius-xl)', border: '1.5px solid var(--border)', padding: '24px', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: 0, right: 0, padding: '10px 16px', background: 'var(--success-light)', color: 'var(--success)', fontSize: '11px', fontWeight: 700, borderRadius: '0 0 0 16px' }}>
             {linkedPatient.status.toUpperCase()}
@@ -117,7 +125,7 @@ const CaretakerDashboard = () => {
         </div>
       </div>
 
-      <div style={{ padding: '0 24px' }}>
+      <div className="px-mobile-16" style={{ padding: '0 24px' }}>
         <div style={{ fontSize: '18px', fontWeight: 700, marginBottom: '14px' }}>Device Status</div>
         <div style={{ background: 'var(--surface)', padding: '16px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
