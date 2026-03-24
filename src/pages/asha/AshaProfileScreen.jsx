@@ -9,6 +9,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { AppContext } from '../../context/AppContext';
 import { db } from '../../config/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
+import { COLLECTIONS, validateFirestoreDocument } from '../../config/firebaseSchema';
 
 // Firebase Storage — imported lazily so the app still works
 // if storage isn't configured
@@ -83,13 +84,15 @@ const AshaProfileScreen = () => {
     try {
       // 1. Update Firestore
       if (user) {
-        await updateDoc(doc(db, 'users', user.uid), {
+        const profilePatch = {
           name: formData.name,
           ashaId: formData.ashaId,
           village: formData.village,
           yearsService: formData.yearsService,
-          updatedAt: new Date(),
-        });
+          updatedAt: new Date()
+        };
+        validateFirestoreDocument('users', profilePatch, { partial: true });
+        await updateDoc(doc(db, COLLECTIONS.users, user.uid), profilePatch);
         // Also call the hook's updateProfile to refresh local profile state
         if (updateProfile) await updateProfile(formData);
       }
@@ -147,7 +150,9 @@ const AshaProfileScreen = () => {
           const photoURL  = await getDownloadURL(snapshot.ref);
 
           // Save URL to Firestore
-          await updateDoc(doc(db, 'users', user.uid), { photoURL });
+          const photoPatch = { photoURL };
+          validateFirestoreDocument('users', photoPatch, { partial: true });
+          await updateDoc(doc(db, COLLECTIONS.users, user.uid), photoPatch);
 
           // Update AppContext with the permanent Firebase URL
           updateCurrentUser({ photoURL });
