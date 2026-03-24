@@ -21,6 +21,8 @@
           "asha",
           "doctor",
           "mother",
+          "patient",
+          "caretaker",
           "admin"
         ]
       },
@@ -109,7 +111,10 @@
           "FALL",
           "LOW_SPO2",
           "HIGH_HEART_RATE",
-          "MANUAL_SOS"
+          "MANUAL_SOS",
+          "aiCritical",
+          "vitals",
+          "abnormal"
         ]
       },
       "allowAdditionalFields": true

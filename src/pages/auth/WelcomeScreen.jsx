@@ -36,6 +36,11 @@ const WelcomeScreen = () => {
             padding-bottom: calc(40px + env(safe-area-inset-bottom)) !important;
           }
           .welcome-title p { font-size: 32px !important; letter-spacing: -1px !important; }
+          .top-right-group { 
+            position: static !important; 
+            margin-bottom: 24px !important;
+            justify-content: flex-end !important;
+          }
         }
         
         .action-button {
@@ -104,14 +109,14 @@ const WelcomeScreen = () => {
           backgroundColor: '#FFFFFF', overflow: 'hidden'
         }}>
           {/* Controls */}
-          <div style={{ position: 'absolute', top: 32, right: 32, display: 'flex', gap: '8px', zIndex: 100 }}>
-            <button onClick={() => toggleLanguage(language === 'en' ? 'te' : 'en')} style={{ padding: '6px 14px', borderRadius: '100px', border: '1px solid #e1e3e4', background: '#FFFFFF', fontWeight: 700, cursor: 'pointer' }}>{language.toUpperCase()}</button>
-            <button onClick={toggleTheme} style={{ width: '38px', height: '38px', borderRadius: '50%', border: '1px solid #e1e3e4', background: '#FFFFFF', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="top-right-group" style={{ position: 'absolute', top: 32, right: 32, display: 'flex', gap: '8px', zIndex: 100 }}>
+            <button onClick={() => toggleLanguage(language === 'en' ? 'te' : 'en')} style={{ padding: '6px 14px', borderRadius: '100px', border: '1px solid #e1e3e4', background: '#FFFFFF', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>{language.toUpperCase()}</button>
+            <button onClick={toggleTheme} style={{ width: '38px', height: '38px', borderRadius: '50%', border: '1px solid #e1e3e4', background: '#FFFFFF', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               {theme === 'light' ? <MdOutlineDarkMode size={18} /> : <MdOutlineLightMode size={18} />}
             </button>
           </div>
 
-          <div style={{ maxWidth: '440px', width: '100%', margin: '0 0 0 -20px' }}>
+          <div style={{ maxWidth: '440px', width: '100%', margin: '0 auto' }}>
             {/* Logo */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
               <FaHeartbeat size={36} color="#C2185B" />

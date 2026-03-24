@@ -39,10 +39,11 @@ const MotherReportsScreen = () => {
 
   return (
     <MotherLayout>
-      <header style={{
+      <header className="responsive-px" style={{
         background: 'var(--surface)', borderBottom: '1px solid var(--border)',
-        padding: '16px 24px', position: 'sticky', top: 0, zIndex: 50,
-        display: 'flex', alignItems: 'center', gap: '12px'
+        paddingTop: '16px', paddingBottom: '16px', position: 'sticky', top: 0, zIndex: 50,
+        display: 'flex', alignItems: 'center', gap: '12px',
+        paddingTop: 'calc(16px + env(safe-area-inset-top))'
       }}>
         <button
           onClick={() => navigate(-1)}
@@ -59,7 +60,7 @@ const MotherReportsScreen = () => {
         </span>
       </header>
 
-      <div style={{ padding: '20px 24px' }}>
+      <div className="responsive-px" style={{ paddingTop: '20px' }}>
         
         {/* Simplified Filters (Row of pills) */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', overflowX: 'auto', paddingBottom: '4px' }}>

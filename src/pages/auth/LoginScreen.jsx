@@ -78,17 +78,29 @@ const LoginScreen = () => {
             position: relative !important; 
             width: 100% !important; 
             height: 280px !important; 
-            padding: 24px !important; 
-            padding-top: calc(24px + env(safe-area-inset-top)) !important;
+            padding: 16px !important; 
+            padding-top: calc(16px + env(safe-area-inset-top)) !important;
           }
           .form-side { 
             width: 100% !important; 
-            padding: 32px 20px !important; 
+            padding: 16px !important; 
             height: auto !important; 
             overflow: visible !important; 
             padding-bottom: calc(40px + env(safe-area-inset-bottom)) !important;
           }
-          .role-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+          .top-left-btn, .top-right-group { 
+            position: static !important; 
+            margin-bottom: 24px !important; 
+          }
+          .top-controls-wrapper {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            width: 100% !important;
+            margin-bottom: 24px !important;
+          }
+          .role-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+          .role-card { padding: 12px 8px !important; }
         }
         
         .role-card {
@@ -148,19 +160,21 @@ const LoginScreen = () => {
           display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '64px 100px',
           backgroundColor: '#FFFFFF', overflow: 'hidden'
         }}>
-          {/* Top Controls */}
-          <div style={{ position: 'absolute', top: 32, right: 32, display: 'flex', gap: '8px', zIndex: 100 }}>
-            <button onClick={() => toggleLanguage(language === 'en' ? 'te' : 'en')} style={{ padding: '6px 14px', borderRadius: '100px', border: '1px solid #e1e3e4', background: '#FFFFFF', fontWeight: 700, cursor: 'pointer' }}>{language.toUpperCase()}</button>
-            <button onClick={toggleTheme} style={{ width: '38px', height: '38px', borderRadius: '50%', border: '1px solid #e1e3e4', background: '#FFFFFF', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {theme === 'light' ? <MdOutlineDarkMode size={18} /> : <MdOutlineLightMode size={18} />}
+          {/* Integrated Top Controls for Mobile Responsiveness */}
+          <div className="top-controls-wrapper" style={{ position: 'relative', width: '100%', display: 'contents' }}>
+            <div className="top-right-group" style={{ position: 'absolute', top: 32, right: 32, display: 'flex', gap: '8px', zIndex: 100 }}>
+              <button onClick={() => toggleLanguage(language === 'en' ? 'te' : 'en')} style={{ padding: '6px 14px', borderRadius: '100px', border: '1px solid #e1e3e4', background: '#FFFFFF', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>{language.toUpperCase()}</button>
+              <button onClick={toggleTheme} style={{ width: '38px', height: '38px', borderRadius: '50%', border: '1px solid #e1e3e4', background: '#FFFFFF', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {theme === 'light' ? <MdOutlineDarkMode size={18} /> : <MdOutlineLightMode size={18} />}
+              </button>
+            </div>
+
+            <button className="top-left-btn" onClick={() => navigate('/welcome')} style={{ position: 'absolute', top: 32, left: 32, border: 'none', background: '#F8F9FA', width: '38px', height: '38px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+              <FaArrowLeft size={16} />
             </button>
           </div>
 
-          <button onClick={() => navigate('/welcome')} style={{ position: 'absolute', top: 32, left: 32, border: 'none', background: '#F8F9FA', width: '38px', height: '38px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <FaArrowLeft size={16} />
-          </button>
-
-          <div style={{ maxWidth: '420px', width: '100%', margin: '0 0 0 -20px' }}>
+          <div style={{ maxWidth: '420px', width: '100%', margin: '0 auto' }}>
              <div style={{ display: 'flex', background: '#F8F9FA', borderRadius: '12px', padding: '4px', marginBottom: '32px' }}>
               <button 
                 onClick={() => setMode('login')}
@@ -197,7 +211,17 @@ const LoginScreen = () => {
 
             <p style={{ textAlign: 'center', fontSize: '11px', color: '#8d6f75', marginTop: '24px' }}>By continuing, you agree to our Terms and Privacy Policy.</p>
 
-            <button onClick={() => navigate(`/${role}/dashboard`)} style={{ width: '100%', marginTop: '12px', height: '40px', background: 'transparent', border: 'none', fontSize: '12px', color: '#8d6f75', cursor: 'pointer' }}>Skip Login (Dev Mode)</button>
+            <button 
+              onClick={() => {
+                let target = `/${role}/dashboard`;
+                if (role === 'patient') target = '/dashboard/elderly';
+                if (role === 'caretaker') target = '/family-dashboard';
+                navigate(target);
+              }} 
+              style={{ width: '100%', marginTop: '12px', height: '40px', background: 'transparent', border: 'none', fontSize: '12px', color: '#8d6f75', cursor: 'pointer' }}
+            >
+              Skip Login (Dev Mode)
+            </button>
           </div>
         </div>
       </div>

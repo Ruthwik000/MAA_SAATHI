@@ -179,12 +179,45 @@ h3 { font-size: calc(22px * var(--font-scale)); }
 .w-full { width: 100%; }
 .max-w-full { max-width: 100%; }
 .min-h-screen { min-height: 100dvh; }
+.px-24 { padding-left: 24px; padding-right: 24px; }
+.py-40 { padding-top: 40px; padding-bottom: 40px; }
+.m-b-8 { margin-bottom: 8px; }
+.m-t-32 { margin-top: 32px; }
+.gap-12 { gap: 12px; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.text-center { text-align: center; }
 
 /* Responsive Spacing (Overridable) */
 @media (max-width: 640px) {
   .p-mobile-16 { padding: 16px !important; }
   .p-mobile-20 { padding: 20px !important; }
   .px-mobile-16 { padding-left: 16px !important; padding-right: 16px !important; }
+
+  .responsive-px {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  
+  .responsive-mx {
+    margin-left: 24px;
+    margin-right: 24px;
+  }
+
+  @media (max-width: 600px) {
+    .responsive-px, .px-24 {
+      padding-left: 16px !important;
+      padding-right: 16px !important;
+    }
+    .responsive-mx {
+      margin-left: 16px !important;
+      margin-right: 16px !important;
+    }
+    .py-40 { padding-top: 24px !important; padding-bottom: 24px !important; }
+    .responsive-p { padding: 12px 14px !important; }
+    h1, h2, h3 { text-align: left; }
+  }
   .m-mobile-t-16 { margin-top: 16px !important; }
 }
 

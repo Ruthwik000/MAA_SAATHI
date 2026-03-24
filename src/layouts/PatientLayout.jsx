@@ -13,9 +13,9 @@ const PatientLayout = ({ children, role = 'mother', patientType = '' }) => {
   if (role === 'caretaker') homePath = '/dashboard/caretaker';
 
   const NAV_ITEMS = [
-    { label: 'Home',    icon: FaHome,        path: homePath },
-    { label: 'Reports', icon: FaFilePdf,    path: '/mother/reports'   },
-    { label: 'Profile', icon: FaUserCircle, path: '/mother/profile'   },
+    { label: 'Home',    icon: FaHome,       path: homePath },
+    { label: 'Reports', icon: FaFilePdf,    path: role === 'caretaker' ? '/caretaker/reports' : '/mother/reports' },
+    { label: 'Profile', icon: FaUserCircle, path: role === 'caretaker' ? '/caretaker/profile' : '/mother/profile' },
   ];
 
   return (
@@ -33,8 +33,8 @@ const PatientLayout = ({ children, role = 'mother', patientType = '' }) => {
       <div style={{
         position: 'fixed', 
         bottom: 'calc(16px + env(safe-area-inset-bottom))',
-        left: '24px', 
-        right: '24px', 
+        left: '16px', 
+        right: '16px', 
         zIndex: 100, 
         pointerEvents: 'none'
       }}>

@@ -81,7 +81,15 @@ const WellnessDashboard = () => {
 
   return (
     <PatientLayout patientType="wellness">
-      <header style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)', padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <header className="responsive-px" style={{ 
+        background: 'var(--surface)', 
+        borderBottom: '1px solid var(--border)', 
+        paddingTop: '16px', paddingBottom: '16px',
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between',
+        paddingTop: 'calc(16px + env(safe-area-inset-top))'
+      }}>
         <div>
           <div style={{ fontSize: '24px', fontWeight: 800 }}>Namaste, {name} 👋</div>
           <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{text.subtitle}</div>
@@ -91,7 +99,7 @@ const WellnessDashboard = () => {
         </div>
       </header>
 
-      <div style={{ margin: '16px 24px', padding: '12px 20px', background: 'var(--surface)', border: '1.5px solid var(--success-light)', borderRadius: 'var(--radius-lg)', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: 'var(--shadow-sm)' }}>
+      <div className="responsive-mx responsive-p" style={{ marginTop: '16px', padding: '12px 20px', background: 'var(--surface)', border: '1.5px solid var(--success-light)', borderRadius: 'var(--radius-lg)', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: 'var(--shadow-sm)' }}>
         <FaBroadcastTower color="var(--success)" className="animate-pulse" />
         <span style={{ fontWeight: 600, color: 'var(--success)', flex: 1 }}>{text.ring}</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -100,8 +108,8 @@ const WellnessDashboard = () => {
         </div>
       </div>
 
-      <div style={{ padding: '0 24px' }}>
-          <div style={{ background: 'var(--surface)', padding: '24px', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-md)' }}>
+      <div className="responsive-px" style={{ paddingTop: '16px' }}>
+          <div className="responsive-p" style={{ background: 'var(--surface)', padding: '24px', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-md)' }}>
              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '16px' }}>
                 <div>
                   <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{text.steps}</div>
@@ -118,7 +126,7 @@ const WellnessDashboard = () => {
           </div>
       </div>
 
-      <div style={{ padding: '24px 24px 0 24px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+      <div className="responsive-px" style={{ paddingTop: '24px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
           {[
             { icon: FaBed, color: 'var(--info)', label: text.sleep, val: '7.2 hrs' },
             { icon: FaBrain, color: 'var(--warning)', label: text.stress, val: 'Optimal' },
@@ -135,7 +143,7 @@ const WellnessDashboard = () => {
           ))}
       </div>
 
-      <div style={{ margin: '24px', padding: '20px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)' }}>
+      <div className="responsive-mx responsive-p" style={{ marginTop: '24px', padding: '20px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)' }}>
          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
             <FaChartLine color="var(--accent)" />
             <span style={{ fontSize: '16px', fontWeight: 700 }}>{text.analytics}</span>
@@ -152,8 +160,13 @@ const WellnessDashboard = () => {
          </div>
       </div>
 
-      <div style={{ padding: '0 24px 40px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+      <div className="responsive-px" style={{ paddingBottom: '96px', paddingTop: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="action-button-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <style dangerouslySetInnerHTML={{__html: `
+              @media (max-width: 400px) {
+                .action-button-grid { grid-template-columns: 1fr !important; }
+              }
+            `}} />
             <button 
               onClick={() => generatePDF('instant', 'download')}
               style={{ height: '56px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '16px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 4px 15px rgba(194, 24, 91, 0.2)' }}

@@ -104,6 +104,7 @@ function App() {
         {/* Caretaker & Family Routes */}
         <Route path="/caretaker-type" element={<CaretakerType />} />
         <Route path="/family-dashboard" element={<FamilyDashboard />} />
+        <Route path="/caretaker/dashboard" element={<FamilyDashboard />} />
         <Route path="/family-patients" element={<FamilyDashboard />} />
         <Route path="/family-alerts" element={<FamilyDashboard />} />
         <Route path="/family-reports" element={<FamilyDashboard />} />
@@ -112,6 +113,9 @@ function App() {
         <Route path="/caretaker/reports" element={<CaretakerReports />} />
         <Route path="/caretaker/alerts" element={<CaretakerAlerts />} />
         <Route path="/caretaker/profile" element={<CaretakerProfile />} />
+        
+        {/* Alias / Patient specific */}
+        <Route path="/patient/dashboard" element={<ElderlyDashboard />} />
 
         {/* Shared / Global Routes */}
         <Route path="/shared/ai-report" element={<AIReportResultScreen />} />

@@ -8,6 +8,7 @@ import {
   FaFilePdf, FaChevronRight, FaTimes, FaVial
 } from 'react-icons/fa';
 import { MdOutlineDarkMode, MdOutlineLightMode, MdNotificationsActive } from 'react-icons/md';
+import PatientLayout from '../../layouts/PatientLayout';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../hooks/useAuth';
@@ -69,7 +70,8 @@ const FamilyDashboard = () => {
   };
 
   return (
-    <div className="layout-root">
+    <PatientLayout role="caretaker">
+      <div className="layout-root">
       <style dangerouslySetInnerHTML={{__html: `
         .layout-root {
           display: flex; height: 100vh; width: 100vw;
@@ -83,7 +85,7 @@ const FamilyDashboard = () => {
         }
         .main-scroll-area {
           flex: 1; height: 100%; overflow-y: auto;
-          padding: 32px 40px;
+          padding: 24px;
         }
         .content-width { width: 100%; max-width: 1000px; margin: 0 auto; }
 
@@ -131,13 +133,20 @@ const FamilyDashboard = () => {
         .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
         @media (max-width: 1024px) {
-           .static-sidebar { width: 80px; }
+           .static-sidebar { display: none; }
            .sidebar-label { display: none; }
            .stat-grid, .action-row, .report-grid { grid-template-columns: 1fr; }
         }
         @media (max-width: 768px) {
-           .static-sidebar { display: none; }
-           .main-scroll-area { padding: 20px; }
+           .main-scroll-area { padding: 16px !important; }
+           .emergency-banner { flex-direction: column; gap: 16px; align-items: flex-start !important; }
+           .emergency-banner button { width: 100%; }
+           .stat-grid { grid-template-columns: 1fr !important; }
+           .action-row { grid-template-columns: 1fr 1fr !important; }
+           .patient-monitor { flex-direction: column; align-items: flex-start !important; gap: 16px; }
+           .patient-monitor > div:last-child { width: 100%; justify-content: space-between; }
+           .report-grid { grid-template-columns: 1fr !important; }
+           header { flex-direction: column; align-items: flex-start !important; gap: 16px; }
         }
       `}} />
 
@@ -166,8 +175,8 @@ const FamilyDashboard = () => {
       </aside>
 
       {/* --- DASHBOARD --- */}
-      <main className="main-scroll-area">
-        <div className="content-width" id="dashboard-top" style={{ paddingBottom: '96px' }}>
+      <main className="main-scroll-area responsive-px">
+        <div className="content-width" id="dashboard-top" style={{ paddingBottom: '96px', paddingTop: 'env(safe-area-inset-top)' }}>
           <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
              <div>
                 <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-tertiary)', letterSpacing: '1px' }}>{dynamicDate}</div>
@@ -200,13 +209,13 @@ const FamilyDashboard = () => {
 
           <div className="stat-grid" ref={vitalsRef}>
              {stats.map((stat, i) => (
-               <div key={i} className="compact-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+               <div key={i} className="compact-card responsive-p" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-tertiary)', marginBottom: '4px' }}>{stat.label}</div>
-                    <div style={{ fontSize: '32px', fontWeight: 800 }}>{stat.value}</div>
+                    <div style={{ fontSize: '28px', fontWeight: 800 }}>{stat.value}</div>
                   </div>
-                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: stat.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <stat.icon color={stat.color} size={22} />
+                  <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: stat.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <stat.icon color={stat.color} size={20} />
                   </div>
                </div>
              ))}
@@ -252,19 +261,20 @@ const FamilyDashboard = () => {
           <div ref={reportsRef}>
              <h3 style={{ fontSize: '18px', fontWeight: 800, marginBottom: '16px' }}>Intelligence Reports</h3>
              <div className="report-grid">
+                {/* Intelligence Reports */}
                 {[
                   { id: 'rep1', month: 'March', date: '24' },
                   { id: 'rep2', month: 'February', date: '17' }
                 ].map(rep => (
-                  <div key={rep.id} className="compact-card" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                     <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--accent-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <FaFilePdf size={24} color="var(--accent)" />
+                  <div key={rep.id} className="compact-card responsive-p" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                     <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--accent-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <FaFilePdf size={20} color="var(--accent)" />
                      </div>
-                     <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '16px', fontWeight: 800 }}>{rep.month} Summary</div>
-                        <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>Published Mar {rep.date}</div>
+                     <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '15px', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{rep.month} Summary</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>Mar {rep.date}</div>
                      </div>
-                     <button onClick={() => navigate(`/report/${rep.id}`)} className="sidebar-item" style={{ padding: '8px', borderRadius: '10px', background: 'var(--bg-secondary)', border: 'none' }}><FaEye size={16}/></button>
+                     <button onClick={() => navigate(`/report/${rep.id}`)} style={{ padding: '8px', borderRadius: '10px', background: 'var(--bg-secondary)', border: 'none', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FaEye size={16}/></button>
                   </div>
                 ))}
              </div>
@@ -273,7 +283,8 @@ const FamilyDashboard = () => {
       </main>
 
       {/* --- MODALS --- */}
-    </div>
+      </div>
+    </PatientLayout>
   );
 };
 

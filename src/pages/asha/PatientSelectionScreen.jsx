@@ -66,7 +66,8 @@ const PatientSelectionScreen = () => {
       background: 'var(--bg-secondary)',
       minHeight: '100dvh',
       paddingBottom: '96px',
-      fontFamily: '"DM Sans", sans-serif'
+      fontFamily: '"DM Sans", sans-serif',
+      paddingTop: 'env(safe-area-inset-top)'
     }}>
 
       <style dangerouslySetInnerHTML={{__html: `
@@ -106,16 +107,17 @@ const PatientSelectionScreen = () => {
       `}} />
 
       {/* ── STICKY HEADER ── */}
-      <header style={{
+      <header className="responsive-px" style={{
         background: 'var(--surface)',
         borderBottom: '1px solid var(--border)',
-        padding: '16px 24px',
+        paddingTop: '16px', paddingBottom: '16px',
         position: 'sticky',
         top: 0,
         zIndex: 50,
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        paddingTop: 'calc(16px + env(safe-area-inset-top))'
       }}>
         {/* Left: back + title */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -179,7 +181,7 @@ const PatientSelectionScreen = () => {
       </header>
 
       {/* ── SEARCH BAR ── */}
-      <div style={{ margin: '16px 24px 0 24px', position: 'relative' }}>
+      <div className="responsive-mx" style={{ marginTop: '16px', position: 'relative' }}>
         <FaSearch style={{
           position: 'absolute',
           left: '14px',
@@ -212,7 +214,7 @@ const PatientSelectionScreen = () => {
       </div>
 
       {/* ── TAB PILLS ── */}
-      <div style={{ margin: '16px 24px', display: 'flex', gap: '8px' }}>
+      <div className="responsive-mx" style={{ margin: '16px 0', display: 'flex', gap: '8px' }}>
         <button
           onClick={() => setActiveTab('pregnant')}
           style={{
@@ -252,7 +254,7 @@ const PatientSelectionScreen = () => {
       </div>
 
       {/* ── PATIENT LIST ── */}
-      <div style={{ padding: '0 24px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div className="responsive-px" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
 
         {filteredPatients.length > 0 ? (
           filteredPatients.map(p => {

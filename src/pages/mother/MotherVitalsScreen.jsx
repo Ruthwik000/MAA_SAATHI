@@ -42,9 +42,9 @@ const MotherVitalsScreen = () => {
   return (
     <MotherLayout>
       {/* ── STICKY HEADER ── */}
-      <header style={{
+      <header className="responsive-px" style={{
         background: 'var(--surface)', borderBottom: '1px solid var(--border)',
-        padding: '16px 24px', position: 'sticky', top: 0, zIndex: 50,
+        paddingTop: '16px', paddingBottom: '16px', position: 'sticky', top: 0, zIndex: 50,
         display: 'flex', alignItems: 'center', gap: '12px',
         paddingTop: 'calc(16px + env(safe-area-inset-top))'
       }}>
@@ -63,7 +63,7 @@ const MotherVitalsScreen = () => {
         </span>
       </header>
 
-      <div className="px-mobile-16" style={{ padding: '20px 24px' }}>
+      <div className="responsive-px" style={{ paddingTop: '20px' }}>
         
         {/* ── FILTER PILLS ── */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>

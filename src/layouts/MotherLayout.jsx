@@ -25,7 +25,7 @@ const MotherLayout = ({ children }) => {
       {/* ── Floating pill bottom nav ── */}
       <div style={{
         position: 'fixed', bottom: '16px',
-        left: '24px', right: '24px', zIndex: 100, pointerEvents: 'none'
+        left: '16px', right: '16px', zIndex: 100, pointerEvents: 'none'
       }}>
         <div style={{
           maxWidth: '480px', margin: '0 auto', pointerEvents: 'auto',

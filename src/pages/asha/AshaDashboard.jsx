@@ -154,7 +154,7 @@ const AshaDashboard = () => {
 
         @media (max-width: 768px) {
           .asha-sidebar { display: none !important; }
-          .asha-main { margin-left: 0 !important; padding: 20px 16px !important; padding-bottom: 120px !important; }
+          .asha-main { margin-left: 0 !important; padding: 16px 16px !important; padding-bottom: 120px !important; }
           .asha-bottom-nav { 
             display: flex !important; 
             position: fixed !important; 
@@ -173,11 +173,26 @@ const AshaDashboard = () => {
           .bottom-nav-item.active { color: var(--accent); }
           .bottom-nav-item svg { font-size: 22px; color: inherit; }
           .bottom-nav-item span { font-size: 10px; font-weight: 500; }
-          .stat-card-row { grid-template-columns: 1fr !important; }
-          .quick-action-row { grid-template-columns: repeat(2, 1fr) !important; }
-          header { flex-direction: column !important; gap: 20px !important; align-items: flex-start !important; }
-          .asha-greeting { font-size: 26px !important; }
-          .header-right { align-self: flex-end !important; }
+          
+          .stat-card-row { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+          .stat-card-row > div:last-child { grid-column: span 2 !important; }
+          
+          .quick-action-row { grid-template-columns: 1fr !important; gap: 10px !important; }
+          .quick-card { padding: 16px !important; flex-direction: row !important; align-items: center !important; gap: 16px !important; }
+          .quick-card div:first-child { flex-shrink: 0 !important; }
+          
+          header { flex-direction: column !important; gap: 16px !important; align-items: flex-start !important; }
+          .asha-greeting { font-size: 28px !important; }
+          .header-right { width: 100% !important; justify-content: space-between !important; margin-top: 8px !important; }
+          
+          .emergency-card { flex-direction: column !important; align-items: flex-start !important; gap: 20px !important; }
+          .emergency-card button { width: 100% !important; }
+          
+          .patient-card { gap: 12px !important; padding: 12px 14px !important; }
+          .patient-card .card-center { min-width: 0 !important; }
+          .patient-card .card-right { flex-direction: column !important; align-items: flex-end !important; gap: 6px !important; }
+          .patient-card .card-meta { flex-direction: column !important; align-items: flex-start !important; gap: 2px !important; }
+          .patient-card .card-meta > div:nth-child(2) { display: none !important; } /* Hide the dot on mobile */
         }
       `}} />
 
@@ -277,49 +292,48 @@ const AshaDashboard = () => {
 
         {/* Emergency Alert Card */}
         {activeAlert && (
-          <div style={{
+          <div className="emergency-card" style={{
             width: '100%',
             background: 'var(--danger)',
             borderRadius: 'var(--radius-lg)',
-            padding: '20px 24px',
+            padding: '24px',
             marginBottom: '24px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: '16px',
             cursor: 'pointer',
-            animation: 'alertPulse 2s infinite'
+            animation: 'alertPulse 2s infinite',
+            boxSizing: 'border-box'
           }} onClick={() => navigate('/shared/ring-alert')}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'white', boxShadow: '0 0 0 0 rgba(255,255,255,0.4)', animation: 'sosPulse 1.5s infinite' }} />
+              <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'white', boxShadow: '0 0 0 0 rgba(255,255,255,0.4)', animation: 'sosPulse 1.5s infinite', flexShrink: 0 }} />
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', color: 'rgba(255,255,255,0.8)', marginBottom: '6px' }}>
-                  <FaBell size={16} color="white" /> {t.dashboard.emergencyAlert}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'rgba(255,255,255,0.85)', marginBottom: '8px' }}>
+                  <FaBell size={14} color="white" /> {t.dashboard.emergencyAlert}
                 </div>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: 'white', marginBottom: '4px' }}>Meera Bai</div>
-                <div style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '100px', padding: '4px 12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ fontSize: '24px', fontWeight: 800, color: 'white', marginBottom: '6px' }}>Meera Bai</div>
+                <div style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '100px', padding: '6px 14px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                   <FaRing size={12} color="white" />
-                  <span style={{ fontSize: '12px', fontWeight: 500, color: 'white' }}>{t.dashboard.ringSOSPressed}</span>
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'white' }}>{t.dashboard.ringSOSPressed}</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: 'rgba(255,255,255,0.7)', marginTop: '6px' }}>
-                  <FaMapMarkerAlt size={12} color="rgba(255,255,255,0.7)" /> House 12, Ramgarh
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'rgba(255,255,255,0.75)', marginTop: '8px' }}>
+                  <FaMapMarkerAlt size={12} color="white" /> House 12, Ramgarh
                 </div>
               </div>
             </div>
             <button style={{
-              background: 'rgba(255,255,255,0.2)',
-              color: 'white',
-              border: '1.5px solid rgba(255,255,255,0.4)',
-              padding: '10px 20px',
-              borderRadius: 'var(--radius-md)',
+              background: 'white',
+              color: 'var(--danger)',
+              border: 'none',
+              padding: '12px 24px',
+              borderRadius: '12px',
               fontSize: '14px',
-              fontWeight: 600,
+              fontWeight: 700,
               cursor: 'pointer',
-              backdropFilter: 'blur(4px)',
-              whiteSpace: 'nowrap'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}>
+              whiteSpace: 'nowrap',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+            }}>
               {t.dashboard.view} <FaChevronRight size={14} style={{ marginLeft: '4px' }} />
             </button>
           </div>
@@ -404,19 +418,19 @@ const AshaDashboard = () => {
                   <div style={{ width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: 700, flexShrink: 0, background: bg, color: color }}>
                     {home.initials}
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="card-center" style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{home.name}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className="card-meta" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{home.location}</span>
                       <div style={{ width: '3px', height: '3px', borderRadius: '50%', background: 'var(--text-tertiary)' }} />
                       <span style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>{t.patient.lastVisited} {home.date}</span>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div className="card-right" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
                     <span style={{ padding: '4px 10px', borderRadius: '100px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', background: bg, color: color }}>
                       {home.risk === 'HIGH' ? t.common.high : home.risk === 'MED' ? t.common.medium : t.common.low}
                     </span>
-                    <FaChevronRight size={16} color="var(--text-tertiary)" />
+                    <FaChevronRight size={14} color="var(--text-tertiary)" />
                   </div>
                 </div>
               );

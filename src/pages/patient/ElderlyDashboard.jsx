@@ -129,10 +129,10 @@ const ElderlyDashboard = () => {
 
   return (
     <PatientLayout patientType="elderly">
-      <header style={{ 
+      <header className="responsive-px" style={{ 
         background: 'var(--surface)', 
         borderBottom: '1px solid var(--border)', 
-        padding: '16px 24px', 
+        paddingTop: '16px', paddingBottom: '16px',
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'space-between',
@@ -147,8 +147,8 @@ const ElderlyDashboard = () => {
         </div>
       </header>
 
-      <div className="px-mobile-16" style={{ padding: '24px', background: 'var(--bg-secondary)' }}>
-        <div style={{ 
+      <div className="responsive-px" style={{ paddingTop: '24px', background: 'var(--bg-secondary)' }}>
+        <div className="responsive-p" style={{ 
           background: aiStatus === 'CRITICAL' ? 'var(--danger-light)' : aiStatus === 'MODERATE' ? 'var(--warning-light)' : 'var(--success-light)',
           border: `2px solid ${aiStatus === 'CRITICAL' ? 'var(--danger)' : aiStatus === 'MODERATE' ? 'var(--warning)' : 'var(--success)'}`,
           borderRadius: 'var(--radius-xl)', padding: '24px', display: 'flex', alignItems: 'center', gap: '20px',
@@ -171,7 +171,7 @@ const ElderlyDashboard = () => {
         </div>
       </div>
 
-      <div className="px-mobile-16" style={{ padding: '0 24px' }}>
+      <div className="responsive-px" style={{ paddingTop: '24px' }}>
         <div style={{ fontSize: '18px', fontWeight: 700, marginBottom: '14px', color: 'var(--text-primary)' }}>{text.vitals}</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
           <div style={{ background: 'var(--surface)', padding: '20px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', textAlign: 'center' }}>
@@ -187,7 +187,10 @@ const ElderlyDashboard = () => {
         </div>
       </div>
 
-      <div className="px-mobile-16" style={{ margin: '24px', padding: '20px', background: 'var(--surface)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border)' }}>
+      <div className="responsive-mx responsive-p" style={{ 
+        marginTop: '24px', padding: '20px', background: 'var(--surface)', 
+        borderRadius: 'var(--radius-xl)', border: '1px solid var(--border)' 
+      }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
           <FaChartLine color="var(--accent)" />
           <span style={{ fontSize: '16px', fontWeight: 700 }}>{text.analytics}</span>
@@ -206,8 +209,13 @@ const ElderlyDashboard = () => {
       </div>
 
       {/* ACTION CLUSTER */}
-      <div className="px-mobile-16" style={{ padding: '0 24px 80px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+      <div className="responsive-px" style={{ paddingBottom: '96px', paddingTop: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="action-button-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <style dangerouslySetInnerHTML={{__html: `
+              @media (max-width: 400px) {
+                .action-button-grid { grid-template-columns: 1fr !important; }
+              }
+            `}} />
             <button 
               onClick={() => generatePDF('instant', 'download')}
               style={{ height: '56px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '16px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}

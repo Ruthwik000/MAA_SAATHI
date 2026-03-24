@@ -226,10 +226,11 @@ const AshaProfileScreen = () => {
       )}
 
       {/* STICKY HEADER */}
-      <header style={{
+      <header className="responsive-px" style={{
         background: 'var(--surface)', borderBottom: '1px solid var(--border)',
-        padding: '16px 24px', position: 'sticky', top: 0, zIndex: 50,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+        paddingTop: '16px', paddingBottom: '16px', position: 'sticky', top: 0, zIndex: 50,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        paddingTop: 'calc(16px + env(safe-area-inset-top))'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button onClick={() => navigate(-1)} style={{
@@ -258,9 +259,9 @@ const AshaProfileScreen = () => {
       </header>
 
       {/* HERO — AVATAR */}
-      <div style={{
+      <div className="responsive-px" style={{
         background: 'var(--surface)', borderBottom: '1px solid var(--border)',
-        padding: '28px 24px', marginBottom: '16px', textAlign: 'center'
+        paddingTop: '28px', paddingBottom: '28px', marginBottom: '16px', textAlign: 'center'
       }}>
         <div style={{ position: 'relative', width: '96px', height: '96px', margin: '0 auto 12px auto' }}>
           {/* Spinner overlay while uploading */}
@@ -336,13 +337,13 @@ const AshaProfileScreen = () => {
         background: 'var(--surface)', borderTop: '1px solid var(--border)',
         borderBottom: '1px solid var(--border)', marginBottom: '16px'
       }}>
-        <div style={sectionHeaderStyle}>
+        <div className="responsive-px" style={sectionHeaderStyle}>
           <FaUser size={16} color="var(--accent)" />
           <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>
             {t.personalDetails}
           </span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', padding: '0 24px' }}>
+        <div className="responsive-px" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
           {/* Full Name — full width */}
           <div style={{ gridColumn: '1 / -1', padding: '14px 0', borderBottom: '1px solid var(--border-subtle)' }}>
             <label style={labelStyle}>{t.cName}</label>
@@ -426,13 +427,13 @@ const AshaProfileScreen = () => {
           background: 'var(--surface)', borderTop: '1px solid var(--border)',
           borderBottom: '1px solid var(--border)', marginBottom: '16px'
         }}>
-          <div style={sectionHeaderStyle}>
+          <div className="responsive-px" style={sectionHeaderStyle}>
             <FaChartLine size={16} color="var(--accent)" />
             <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>
               {t.yourActivity}
             </span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', padding: '16px 24px 20px 24px' }}>
+          <div className="responsive-px" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', paddingBottom: '20px', paddingTop: '16px' }}>
             {[
               { value: stats.patients,       label: t.sPatients, color: 'var(--info)'   },
               { value: stats.visits,          label: t.sVisits,   color: 'var(--accent)' },
@@ -456,7 +457,7 @@ const AshaProfileScreen = () => {
 
       {/* LOGOUT */}
       {!isEditing && (
-        <div style={{ margin: '0 24px 24px 24px' }}>
+        <div className="responsive-px" style={{ marginBottom: '24px' }}>
           <button onClick={handleLogout} className="prof-logout" style={{
             width: '100%', height: '52px', background: 'transparent',
             color: 'var(--danger)', border: '1.5px solid var(--danger)',
