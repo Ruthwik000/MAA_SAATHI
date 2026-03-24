@@ -1,26 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  FaFilePdf, FaDownload, FaCheckCircle, FaSearch,
-  FaClipboardList, FaMapMarkerAlt, FaMoon, FaSun
+  FaFilePdf, FaCheckCircle, FaSearch, FaEye,
+  FaClipboardList, FaMapMarkerAlt, FaBell, FaPhone, FaChevronRight
 } from 'react-icons/fa';
-import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
+import { MdOutlineDarkMode, MdOutlineLightMode, MdTune } from 'react-icons/md';
 import DoctorLayout from '../../layouts/DoctorLayout';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../context/ThemeContext';
+import { useAlerts } from '../../hooks/useAlerts';
+import { generateProfessionalReport } from '../../utils/generatePdfReport';
 
-const ACTIVE_ALERTS = [
-  { id: 'al1', name: 'Sunita Devi',   type: 'Ring SOS',          alertStyle: 'sos',       time: '10 mins ago',  location: 'House 42, Ramgarh', trigger: 'Ring SOS button pressed by patient', patientType: 'mother' },
-  { id: 'al2', name: 'Ram Singh',     type: 'Fall Detected',     alertStyle: 'fall',      time: '1 hour ago',   location: 'House 18, Sila',    trigger: 'Fall detected by accelerometer sensor', patientType: 'elderly' },
-  { id: 'al3', name: 'Priya Patel',   type: 'AI Critical Report', alertStyle: 'critical', time: '2 hours ago',  location: 'House 11, Ramgarh', trigger: 'Critical survey report received from ASHA', patientType: 'mother' },
-  { id: 'al4', name: 'Om Prakash',    type: 'High Glucose',      alertStyle: 'critical', time: '3 hours ago',  location: 'House 5, Ramgarh', trigger: 'Patient reported high glucose levels in survey', patientType: 'wellness' },
+const themeColors = {
+  bg: '#f8f9fa',
+  surface: '#ffffff',
+  surfaceLow: '#f3f4f5',
+  surfaceHigh: '#edeeef',
+  primary: '#9b0044', 
+  primaryLight: '#ffd9df',
+  secondary: '#4c56af', 
+  secondaryLight: '#e0e0ff',
+  textMain: '#191c1d',
+  textMuted: '#594045',
+  textTertiary: '#7d6f75',
+  danger: '#ba1a1a',
+  success: '#006d31'
+};
+
+const alertStyles = {
+  sos: { accent: themeColors.danger, bg: '#fff0f0' },
+  fall: { accent: '#d97706', bg: '#fffbeb' },
+  critical: { accent: themeColors.primary, bg: '#fff1f2' },
+  abnormalVitals: { accent: themeColors.danger, bg: '#fff0f0' }
+};
+
+const MOCK_ALERTS = [
+  { 
+    id: 'al1', name: 'Sunita Devi', type: 'Ring SOS', alertStyle: 'sos', time: '10m ago', 
+    location: 'House 42, Ramgarh', trigger: 'Ring SOS button pressed', 
+    patientType: 'mother', phone: '+91 9876543210',
+    patient: { age: '24', weeks: '28', phone: '+91 9876543210' },
+    vitals: { hr: '110 bpm', spo2: '96%' }
+  },
+  { 
+    id: 'al2', name: 'Ram Singh', type: 'Fall Detected', alertStyle: 'fall', time: '1h ago', 
+    location: 'House 18, Sila', trigger: 'Accelerometer sensor trigger', 
+    patientType: 'elderly', phone: '+91 9988776655',
+    patient: { age: '68', weeks: '0', phone: '+91 9988776655' },
+    vitals: { hr: '82 bpm', spo2: '98%' }
+  }
 ];
 
 const PDF_REPORTS = [
-  { id: 'r1', name: 'Anjali Devi',    asha: 'Lakshmi', date: 'Today, 10:30 AM',      urgency: 'CRITICAL', status: 'New', patientType: 'mother'    },
-  { id: 'r2', name: 'Suhana Khatun', asha: 'Kamala',  date: 'Yesterday, 2:15 PM',  urgency: 'MODERATE', status: 'Viewed', patientType: 'mother' },
-  { id: 'r3', name: 'Gopal Krishan', asha: 'N/A',     date: '2 hours ago',         urgency: 'STABLE',   status: 'New', patientType: 'elderly' },
+  { id: 'r1', name: 'Anjali Devi', age: '24', asha: 'Lakshmi', date: 'Today, 10:30 AM', urgency: 'CRITICAL', patientType: 'pregnant', phc: 'Ramgarh PHC' },
+  { id: 'r2', name: 'Gopal Krishan', age: '72', asha: 'N/A', date: '2 hours ago', urgency: 'STABLE', patientType: 'elderly', phc: 'Main Ramgarh' },
+  { id: 'r3', name: 'Meena Kumari', age: '28', asha: 'Kamla', date: 'Yesterday', urgency: 'MODERATE', patientType: 'pregnant', phc: 'Sila PHC' },
 ];
 
 const DoctorDashboard = () => {
@@ -28,314 +63,263 @@ const DoctorDashboard = () => {
   const { language, toggleLanguage } = useLanguage();
   const { profile } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const [search, setSearch] = useState('');
-  const [photoError, setPhotoError] = useState(false);
   const [activeFilter, setActiveFilter] = useState('All');
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const drName  = profile?.name || 'Dr. Sharma';
-  const drInit  = (profile?.name || 'Dr Sharma').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-  const phcName = profile?.phc  || 'Main Ramgarh';
-  const photoURL = profile?.photoURL || '';
+  const { alerts: firestoreAlerts } = useAlerts('doctor');
 
-  const filters = [
-    { id: 'All', label: 'All Patients' },
-    { id: 'mother', label: 'Mothers' },
-    { id: 'elderly', label: 'Elderly' },
-    { id: 'wellness', label: 'Wellness' }
-  ];
+  const combinedAlerts = useMemo(() => {
+    const fireAlerts = (firestoreAlerts || []).map(a => ({
+      ...a,
+      name: a.patientName || 'Unknown Patient',
+      type: a.type === 'abnormalVitals' ? 'Abnormal Vitals' : a.type || 'Alert',
+      alertStyle: a.type === 'abnormalVitals' ? 'abnormalVitals' : 'critical',
+      time: a.createdAt?.seconds ? new Date(a.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Now',
+      location: a.location || 'Unknown Village',
+      trigger: a.message || 'Health report triggered alert',
+      patientType: a.patientType || 'mother',
+      phone: a.patientPhone || a.phone || '+91 9999999999',
+      patient: {
+        age: a.patientAge || a.age || '25',
+        weeks: a.weeksPregnant || '28',
+        phone: a.patientPhone || a.phone || '+91 9999999999'
+      },
+      vitals: {
+        hr: a.heartRate ? `${a.heartRate} bpm` : 'N/A',
+        spo2: a.oxygen ? `${a.oxygen}%` : 'N/A'
+      }
+    }));
+    return fireAlerts.length === 0 ? MOCK_ALERTS : [...fireAlerts, ...MOCK_ALERTS];
+  }, [firestoreAlerts]);
 
-  const filteredAlerts = ACTIVE_ALERTS.filter(a => activeFilter === 'All' || a.patientType === activeFilter);
-  const filteredReports = PDF_REPORTS.filter(r => activeFilter === 'All' || r.patientType === activeFilter);
+  const handleViewReport = async (rep) => {
+    setIsGenerating(true);
+    try {
+      // Create a full profile object for the report
+      const reportProfile = {
+        name: rep.name,
+        age: rep.age,
+        patientType: rep.patientType,
+        phc: rep.phc
+      };
+      // Mock survey status based on report urgency
+      const reportSurvey = { aiStatus: rep.urgency };
+      generateProfessionalReport(reportProfile, [], reportSurvey, 'view', 'instant');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const filteredAlerts = combinedAlerts.filter(a => activeFilter === 'All' || a.patientType === activeFilter);
+  const filteredReports = PDF_REPORTS.filter(r => activeFilter === 'All' || (activeFilter === 'mother' && r.patientType === 'pregnant') || r.patientType === activeFilter);
 
   const t = {
     en: {
-      duty: 'PHC',
-      onDuty: '— On Duty',
-      pendingLabel: 'Pending Reviews',
-      resolvedLabel: 'Resolved Today',
-      reportsLabel: 'Reports Received',
-      activeAlerts: 'Active Alerts',
-      reports: 'Reports Received',
-      viewAll: 'View All',
-      allPatients: 'All Patients',
-      search: 'Search patients by name or village...',
-      viewDetails: 'View Details',
-      callPatient: 'Call Patient',
-      asha: 'ASHA',
-      noAlerts: 'No active alerts for this category',
-      callingToast: "Calling available on mobile only. Use Send Alert to notify patient."
+      hi: "Welcome back,", active: "Active Alerts", reports: "Intelligence Reports", 
+      all: "All Patients", mothers: "Mothers", elderly: "Elderly", wellness: "Wellness",
+      pending: "Pending", resolved: "Resolved", received: "Received",
+      viewDetails: "View Details", call: "Call", noAlerts: "No active alerts in this category."
     },
-    // ... (te remains same or adds te filters)
+    te: {
+      hi: "తిరిగి స్వాగతం,", active: "సక్రియ హెచ్చరికలు", reports: "రిపోర్ట్లు",
+      all: "అందరూ", mothers: "తల్లులు", elderly: "వృద్ధులు", wellness: "వెల్నెస్",
+      pending: "పెండింగ్", resolved: "పరిష్కరించబడినవి", received: "అందుకున్నవి",
+      viewDetails: "వివరాలు", call: "కాల్", noAlerts: "హెచ్చరికలు లేవు."
+    }
   };
   const text = t[language] || t.en;
 
-  const pendingCount  = filteredAlerts.length;
-  const resolvedCount = 4;
-  const reportCount   = filteredReports.length;
-
-  const inputStyle = {
-    width: '100%', height: '48px', background: 'var(--surface)',
-    border: '1.5px solid var(--border)', borderRadius: 'var(--radius-md)',
-    paddingLeft: '44px', paddingRight: '16px', fontSize: '15px',
-    fontFamily: '"DM Sans", sans-serif', color: 'var(--text-primary)',
-    boxSizing: 'border-box', outline: 'none', transition: 'border-color 0.15s',
-  };
+  const drName = profile?.name || 'Dr. Sharma';
+  const phcName = profile?.phc || 'Main Ramgarh';
 
   return (
     <DoctorLayout>
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes alertDot {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50%       { opacity: 0.35; transform: scale(0.75); }
-        }
-        .dd-search:focus { border-color: var(--accent) !important; }
-        .dd-alert-card:hover { border-color: var(--accent) !important; box-shadow: var(--shadow-elevated) !important; }
-        .dd-report-card:hover { border-color: var(--accent) !important; }
-        .filter-btn {
-          padding: 8px 16px; border-radius: 100px; border: 1.5px solid var(--border);
-          background: transparent; color: var(--text-secondary); font-size: 13px; font-weight: 600;
-          cursor: pointer; transition: all 0.2s; white-space: nowrap;
-        }
-        .filter-btn.active {
-          background: var(--accent); color: white; border-color: var(--accent);
-          box-shadow: 0 4px 12px rgba(194,24,91,0.2);
-        }
-      `}} />
-
-      {/* ── TOP BAR ── */}
-      <header style={{
-        background: 'var(--surface)', borderBottom: '1px solid var(--border)',
-        padding: '16px 20px',
-        position: 'sticky', top: 0, zIndex: 50,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between'
-      }}>
-        {/* Left: avatar + name/status */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div
-            onClick={() => navigate('/doctor/profile')}
-            style={{
-              width: '44px', height: '44px', borderRadius: '50%',
-              background: 'var(--info-light)', border: '2px solid var(--info)',
-              overflow: 'hidden', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', flexShrink: 0, cursor: 'pointer'
-            }}
-          >
-            {photoURL && !photoError ? (
-              <img src={photoURL} alt="Doctor" onError={() => setPhotoError(true)} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-            ) : (
-              <span style={{ fontSize: '16px', fontWeight: 700, color: 'var(--info)' }}>{drInit}</span>
-            )}
-          </div>
-          <div>
-            <div style={{ fontSize: '17px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>{drName.startsWith('Dr') ? drName : `Dr. ${drName}`}</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success)', flexShrink: 0 }} />
-              <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{text.duty} {phcName} {text.onDuty}</span>
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            {['en', 'te'].map(lang => (
-              <button key={lang} onClick={() => toggleLanguage(lang)} style={{ padding: '6px 14px', borderRadius: '100px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', border: '1.5px solid var(--border)', transition: 'all 0.15s', ...(language === lang ? { background: 'var(--accent)', color: 'white', borderColor: 'var(--accent)' } : { background: 'transparent', color: 'var(--text-secondary)' }) }}>{lang.toUpperCase()}</button>
-            ))}
-          </div>
-          <button onClick={toggleTheme} style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--bg-secondary)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-secondary)', flexShrink: 0 }}>{theme === 'light' ? <MdOutlineDarkMode size={18} /> : <MdOutlineLightMode size={18} />}</button>
-        </div>
-      </header>
-
-      {/* ── FILTER BAR ── */}
-      <div style={{
-        padding: '16px 20px 0 20px', display: 'flex', gap: '8px', overflowX: 'auto', scrollbarWidth: 'none'
-      }}>
-        {filters.map(f => (
-          <button
-            key={f.id}
-            className={`filter-btn ${activeFilter === f.id ? 'active' : ''}`}
-            onClick={() => setActiveFilter(f.id)}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
-
-      {/* ── STATS ROW ── */}
-      <div style={{ padding: '16px 20px 0 20px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-          {[
-            { label: text.pendingLabel,  value: pendingCount,  color: 'var(--warning)', Icon: FaClipboardList },
-            { label: text.resolvedLabel, value: resolvedCount, color: 'var(--success)', Icon: FaCheckCircle   },
-            { label: text.reportsLabel,  value: reportCount,   color: 'var(--accent)',  Icon: FaFilePdf       },
-          ].map((s, i) => (
-            <div key={i} style={{
-              background: 'var(--surface)', border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-lg)', padding: '20px', position: 'relative' // Issue 3: Padding 20px
-            }}>
-              <s.Icon style={{
-                position: 'absolute', top: '16px', right: '16px',
-                fontSize: '18px', color: s.color, opacity: 0.2 // Issue 3: Opacity 0.2
-              }} />
-              <div style={{ 
-                fontSize: '36px', fontWeight: 800, color: s.color, lineHeight: 1, marginBottom: '6px' // Issue 3: 36px/800
-              }}>
-                {s.value}
-              </div>
-              <div style={{ 
-                fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', // Issue 3: 11px/600
-                letterSpacing: '1.5px', color: 'var(--text-tertiary)', lineHeight: 1.3 // Issue 3: letter-spacing 1.5px
-              }}>
-                {s.label}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── ACTIVE ALERTS SECTION ── */}
-      <div style={{ padding: '0 20px', marginBottom: '0' }}> {/* Issue 6: 20px padding */}
-        {/* Section header */}
-        <div style={{ 
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-          marginTop: '20px', marginBottom: '14px' // Issue 4: mt:20 mb:14
+      <div style={{ background: themeColors.bg, minHeight: '100vh', fontFamily: '"Manrope", "Inter", sans-serif', color: themeColors.textMain }}>
+        
+        <header style={{ 
+          background: themeColors.surface, borderBottom: `1px solid ${themeColors.surfaceHigh}`, 
+          padding: '24px 40px', position: 'sticky', top: 0, zIndex: 100,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            {/* Pulsing red dot */}
-            <div style={{
-              width: '10px', height: '10px', borderRadius: '50%',
-              background: 'var(--danger)',
-              animation: 'alertDot 1.5s infinite', flexShrink: 0
-            }} />
-            <span style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)' }}>
-              {text.activeAlerts}
-            </span>
-            {/* Count badge */}
-            <div style={{
-              width: '24px', height: '24px', borderRadius: '50%',
-              background: 'var(--danger)', color: 'white',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '12px', fontWeight: 700, flexShrink: 0
-            }}>
-              {ACTIVE_ALERTS.length}
+          <div>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: themeColors.textTertiary, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>
+              {phcName} PHC • Active
             </div>
+            <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0 }}>Dr. {drName}</h1>
           </div>
-        </div>
-
-        {/* Alert cards */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          {filteredAlerts.length === 0 ? (
-            <div style={{
-              background: 'var(--surface)', border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-lg)', padding: '20px',
-              display: 'flex', alignItems: 'center', gap: '10px',
-              color: 'var(--success)', fontSize: '15px', fontWeight: 600
-            }}>
-              <FaCheckCircle /> {text.noAlerts}
-            </div>
-          ) : (
-            filteredAlerts.map(alert => {
-              const aC = alertColors[alert.alertStyle] || alertColors.sos;
-              return (
-                <div
-                  key={alert.id}
-                  className="dd-alert-card"
-                  style={{
-                    background: 'var(--surface)', borderRadius: 'var(--radius-lg)',
-                    border: '1px solid var(--border)',
-                    borderLeft: `4px solid ${aC.border}`,
-                    padding: '20px',
-                    boxShadow: 'var(--shadow-card)', transition: 'all 0.15s'
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <div style={{ display: 'flex', background: themeColors.surfaceLow, borderRadius: '100px', padding: '4px' }}>
+              {['en', 'te'].map(l => (
+                <button 
+                  key={l} onClick={() => toggleLanguage(l)}
+                  style={{ 
+                    padding: '8px 16px', borderRadius: '100px', fontSize: '12px', fontWeight: 700, border: 'none',
+                    background: language === l ? themeColors.primary : 'transparent',
+                    color: language === l ? 'white' : themeColors.textMuted, cursor: 'pointer'
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)' }}>{alert.name}</span>
-                    <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginLeft: '8px', flexShrink: 0 }}>{alert.time}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
-                    <span style={{ padding: '4px 10px', borderRadius: '100px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', background: aC.badgeBg, color: aC.badgeColor, flexShrink: 0 }}>{alert.type}</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'var(--text-secondary)', fontSize: '13px' }}><FaMapMarkerAlt size={11} />{alert.location}</div>
-                  </div>
-                  <p style={{ fontSize: '13px', fontStyle: 'italic', color: 'var(--text-secondary)', marginBottom: '12px', margin: '0 0 12px 0' }}>{alert.trigger}</p>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button onClick={() => navigate(`/doctor/alert/${alert.id}`, { state: { alert } })} style={{ height: '36px', padding: '0 16px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer' }}>{text.viewDetails}</button>
-                    <button onClick={() => window.innerWidth > 768 ? alert(text.callingToast) : window.location.href = `tel:+91 9876543210`} style={{ height: '36px', padding: '0 16px', background: 'transparent', color: 'var(--accent)', border: '1.5px solid var(--accent)', borderRadius: 'var(--radius-md)', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer' }}>{text.callPatient}</button>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </div>
-
-      {/* ── REPORTS RECEIVED SECTION ── */}
-      <div style={{ padding: '0 20px', marginBottom: '0' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '24px', marginBottom: '14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <FaFilePdf size={18} color="var(--accent)" />
-            <span style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)' }}>{text.reports}</span>
+                  {l.toUpperCase()}
+                </button>
+              ))}
+            </div>
+            <button onClick={toggleTheme} style={{ width: '40px', height: '40px', borderRadius: '50%', background: themeColors.surfaceLow, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+              {theme === 'light' ? <MdOutlineDarkMode /> : <MdOutlineLightMode />}
+            </button>
           </div>
-          <button onClick={() => navigate('/doctor/reports')} style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>{text.viewAll}</button>
-        </div>
+        </header>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          {filteredReports.map(rep => {
-            const isCritical = rep.urgency === 'CRITICAL';
-            const urgencyColor = isCritical ? 'var(--danger)' : 'var(--warning)';
-            return (
-              <div
-                key={rep.id}
-                onClick={() => navigate(`/doctor/report/${rep.id}`, { state: { report: rep } })}
-                className="dd-report-card"
-                style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderLeft: `4px solid ${urgencyColor}`, borderRadius: 'var(--radius-lg)', padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', transition: 'all 0.15s', cursor: 'pointer' }}
-              >
-                <div style={{ width: '48px', height: '48px', borderRadius: 'var(--radius-md)', background: isCritical ? 'var(--danger-light)' : 'var(--warning-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <FaFilePdf size={24} color={urgencyColor} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>{rep.name}</div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '2px' }}>{text.asha}: {rep.asha}</div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>{rep.date}</div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', flexShrink: 0 }}>
-                  <span style={{ padding: '4px 10px', borderRadius: '100px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', background: isCritical ? 'var(--danger-light)' : 'var(--warning-light)', color: urgencyColor }}>{rep.urgency}</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ padding: '3px 8px', borderRadius: '100px', fontSize: '10px', fontWeight: 700, background: rep.status === 'New' ? 'var(--accent-light)' : 'var(--success-light)', color: rep.status === 'New' ? 'var(--accent)' : 'var(--success)' }}>{rep.status}</span>
-                    <FaDownload size={16} color="var(--text-tertiary)" style={{ cursor: 'pointer' }} />
+        <main style={{ padding: '40px', maxWidth: '1400px', margin: '0 auto' }}>
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '48px' }}>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {[
+                {id: 'All', l: text.all}, {id: 'mother', l: text.mothers}, 
+                {id: 'elderly', l: text.elderly}, {id: 'wellness', l: text.wellness}
+              ].map(f => (
+                <button 
+                  key={f.id} onClick={() => setActiveFilter(f.id)}
+                  style={{ 
+                    padding: '10px 24px', borderRadius: '14px', fontSize: '14px', fontWeight: 700,
+                    border: 'none', transition: 'all 0.2s', cursor: 'pointer',
+                    background: activeFilter === f.id ? themeColors.primary : themeColors.surface,
+                    color: activeFilter === f.id ? 'white' : themeColors.textMuted,
+                    boxShadow: activeFilter === f.id ? `0 8px 16px ${themeColors.primary}20` : 'none'
+                  }}
+                >
+                  {f.l}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', gap: '24px' }}>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: themeColors.primary }}>{filteredAlerts.length}</div>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: themeColors.textTertiary, textTransform: 'uppercase' }}>{text.pending}</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: themeColors.success }}>{filteredReports.length}</div>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: themeColors.textTertiary, textTransform: 'uppercase' }}>{text.received}</div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '60px' }}>
+            
+            <section>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: themeColors.danger }} />
+                <h2 style={{ fontSize: '20px', fontWeight: 800 }}>{text.active}</h2>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                {filteredAlerts.length === 0 ? (
+                  <div style={{ padding: '60px', textAlign: 'center', color: themeColors.textTertiary, background: themeColors.surface, borderRadius: '24px' }}>
+                    {text.noAlerts}
                   </div>
+                ) : filteredAlerts.map(alert => {
+                   const aS = alertStyles[alert.alertStyle] || alertStyles.sos;
+                   return (
+                     <div 
+                       key={alert.id}
+                       style={{ 
+                         background: themeColors.surface, borderRadius: '24px', padding: '32px',
+                         boxShadow: '0 4px 6px rgba(0,0,0,0.01)', transition: 'all 0.3s'
+                       }}
+                     >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                          <div>
+                            <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: aS.accent, letterSpacing: '1px' }}>
+                              {alert.type} • {alert.time}
+                            </span>
+                            <h3 style={{ fontSize: '20px', fontWeight: 800, margin: '4px 0 0 0' }}>{alert.name}</h3>
+                          </div>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                             <button 
+                               onClick={() => window.location.href = `tel:${alert.phone}`}
+                               style={{ width: '44px', height: '44px', borderRadius: '50%', background: themeColors.bg, color: themeColors.textMain, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                             >
+                               <FaPhone size={16} />
+                             </button>
+                             <button 
+                               onClick={() => alert(`SOS Sent to ${alert.name}`)}
+                               style={{ width: '44px', height: '44px', borderRadius: '50%', background: aS.bg, color: aS.accent, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                             >
+                               <FaBell size={16} />
+                             </button>
+                          </div>
+                        </div>
+
+                        <p style={{ color: themeColors.textMuted, fontSize: '14px', marginBottom: '24px', lineHeight: 1.5 }}>
+                          <FaMapMarkerAlt size={12} style={{ marginRight: '6px' }} />
+                          {alert.location} — {alert.trigger}
+                        </p>
+
+                        <button 
+                          onClick={() => navigate(`/doctor/alert/${alert.id}`, { state: { alert } })}
+                          style={{ 
+                            width: '100%', height: '52px', border: 'none', borderRadius: '14px',
+                            background: themeColors.surfaceLow, color: themeColors.textMain,
+                            fontSize: '14px', fontWeight: 700, cursor: 'pointer', display: 'flex',
+                            alignItems: 'center', justifyContent: 'center', gap: '8px'
+                          }}
+                        >
+                          {text.viewDetails} <FaChevronRight size={12} />
+                        </button>
+                     </div>
+                   );
+                })}
+              </div>
+            </section>
+
+            <aside>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                <h2 style={{ fontSize: '20px', fontWeight: 800 }}>{text.reports}</h2>
+              </div>
+
+              <div style={{ background: themeColors.surface, borderRadius: '24px', padding: '32px' }}>
+                <div style={{ position: 'relative', marginBottom: '24px' }}>
+                  <FaSearch style={{ position: 'absolute', left: '16px', top: '16px', color: themeColors.textTertiary }} />
+                  <input 
+                    type="text" placeholder="Patient Intelligence Search..."
+                    style={{ 
+                      width: '100%', height: '48px', background: themeColors.bg, border: 'none',
+                      borderRadius: '12px', paddingLeft: '48px', paddingRight: '16px',
+                      fontSize: '14px', color: themeColors.textMain, outline: 'none'
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {filteredReports.map(rep => (
+                    <div key={rep.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', border: '1px solid transparent', borderRadius: '16px', transition: 'all 0.2s' }} className="report-row">
+                       <style dangerouslySetInnerHTML={{__html: `.report-row:hover { border-color: ${themeColors.surfaceHigh}; background: ${themeColors.surfaceLow}; }`}} />
+                       <div>
+                          <div style={{ fontSize: '15px', fontWeight: 700 }}>{rep.name}</div>
+                          <div style={{ fontSize: '12px', color: themeColors.textTertiary }}>{rep.date} • {rep.phc}</div>
+                          <div style={{ display: 'inline-block', marginTop: '4px', fontSize: '10px', fontWeight: 800, padding: '2px 8px', borderRadius: '4px', 
+                            background: rep.urgency === 'CRITICAL' ? themeColors.danger + '20' : themeColors.success + '20',
+                            color: rep.urgency === 'CRITICAL' ? themeColors.danger : themeColors.success }}>
+                            {rep.urgency}
+                          </div>
+                       </div>
+                       <button 
+                         onClick={() => handleViewReport(rep)}
+                         disabled={isGenerating}
+                         style={{ width: '40px', height: '40px', borderRadius: '50%', background: themeColors.bg, color: themeColors.primary, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                        >
+                         <FaEye size={16} />
+                       </button>
+                    </div>
+                  ))}
                 </div>
               </div>
-            );
-          })}
-        </div>
-      </div>
+            </aside>
 
-      {/* ── ALL PATIENTS SECTION ── */}
-      <div style={{ padding: '0 20px' }}> {/* Issue 6: 20px padding */}
-        <div style={{ 
-          fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', 
-          marginTop: '24px', marginBottom: '12px' // Issue 4: mt:24 mb:12
-        }}>
-          {text.allPatients}
-        </div>
-
-        {/* Search bar */}
-        <div style={{ position: 'relative', marginBottom: '0px' }}>
-          <FaSearch style={{
-            position: 'absolute', left: '14px', top: '50%',
-            transform: 'translateY(-50%)', fontSize: '16px',
-            color: 'var(--text-tertiary)', pointerEvents: 'none'
-          }} />
-          <input
-            type="text"
-            className="dd-search"
-            placeholder={text.search}
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            onClick={() => navigate('/doctor/patients')}
-            readOnly
-            style={inputStyle}
-          />
-        </div>
+          </div>
+        </main>
       </div>
     </DoctorLayout>
   );

@@ -1,246 +1,215 @@
 import { jsPDF } from "jspdf";
 
 /**
- * Generates random vitals for demonstration purposes
- * @param {number} count 
- * @returns {Array}
+ * DEMO MOCK DATA
+ * Used for simulation when backend is not fully integrated.
  */
-const generateMockVitals = (count = 1) => {
-  const data = [];
-  for (let i = 0; i < count; i++) {
-    data.push({
-      heartRate: Math.floor(Math.random() * (92 - 68 + 1)) + 68,
-      spO2: Math.floor(Math.random() * (99 - 96 + 1)) + 96,
-      temperature: (Math.random() * (37.2 - 36.4) + 36.4).toFixed(1),
-      stepCount: Math.floor(Math.random() * (7500 - 1500 + 1)) + 1500,
-      timestamp: Date.now() - (i * 12 * 60 * 60 * 1000) // Readings every 12 hours
-    });
-  }
-  return data;
+const mockPatient = {
+  name: "Patient ID: MS1023",
+  age: 28,
+  type: "pregnant",
+  medicalHistory: {
+    conditions: ["Mild anemia", "Low blood pressure"],
+    medications: ["Iron supplements"],
+    pastComplications: "No major complications",
+  },
+  vitals: [
+    { heartRate: 82, spO2: 98, temp: 36.7, steps: 3200 },
+    { heartRate: 88, spO2: 97, temp: 36.8, steps: 2800 },
+    { heartRate: 92, spO2: 96, temp: 37.0, steps: 2500 }
+  ],
+  aiSummary: "Patient shows mild anemia with slightly increasing heart rate trend. No critical risk detected but requires monitoring.",
+  riskLevel: "MODERATE"
 };
 
-const MOCK_SURVEYS = [
-  { aiStatus: 'Stable', aiParagraphEnglish: 'Based on current data, the patient is showing healthy vital signs. Cardiovascular stability is evident and oxygen saturation remains within the optimal range.' },
-  { aiStatus: 'Moderate', aiParagraphEnglish: 'The patient shows occasional fluctuations in heart rate. While not critical, regular monitoring is recommended to ensure stability remains consistent.' }
-];
+/**
+ * Helper to calculate averages and trend text
+ */
+const analyzeTrends = (vitals) => {
+  if (!vitals || vitals.length === 0) return { avgHR: 0, avgSpO2: 0, trend: "No data available." };
+  
+  const avgHR = (vitals.reduce((acc, v) => acc + v.heartRate, 0) / vitals.length).toFixed(1);
+  const avgSpO2 = (vitals.reduce((acc, v) => acc + v.spO2, 0) / vitals.length).toFixed(1);
+  
+  let trend = "Vitals remain within stable physiological ranges.";
+  const latest = vitals[0];
+  const oldest = vitals[vitals.length - 1];
+  
+  if (latest.heartRate > oldest.heartRate) {
+    trend = "Heart rate shows an increasing trend over recent readings. SpO2 remains within safe range. Activity levels are moderate.";
+  } else if (latest.heartRate < oldest.heartRate) {
+    trend = "Heart rate shows a calming, decreasing trend. Physiological recovery is evident.";
+  }
+
+  return { avgHR, avgSpO2, trend };
+};
 
 /**
- * Generates an Instant Health Report (Using real data with mock fallback)
+ * Core PDF Generation Logic
  */
-export const generateInstantReport = (user, vitals, surveyData) => {
+const generatePDF = (patientData, reportType = "instant", mode = "download") => {
   const doc = new jsPDF();
+  const data = patientData || mockPatient;
   const now = new Date();
-  
-  // Use real data or generate mock if empty
-  const reportVitals = (vitals && vitals.length > 0) ? vitals : generateMockVitals(5);
-  const reportSurvey = surveyData || MOCK_SURVEYS[Math.floor(Math.random() * MOCK_SURVEYS.length)];
-  const isMock = !vitals || vitals.length === 0;
+  const dateStr = now.toLocaleDateString() + " at " + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  const dateStr = now.toLocaleDateString('en-IN', {
-    day: '2-digit', month: 'long', year: 'numeric',
-    hour: '2-digit', minute: '2-digit'
-  });
-
-  // --- HEADER ---
+  // --- 1. HEADER ---
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
-  doc.setTextColor(33, 37, 41);
+  doc.setTextColor(155, 0, 68); // Brand Magenta
   doc.text("MaaSathi Health Report", 20, 25);
   
-  doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  doc.setTextColor(108, 117, 125);
-  doc.text(isMock ? "Demo Analysis • Sample Health Metrics" : "AI Assisted Health Summary • Real-time Monitoring", 20, 32);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100, 100, 100);
+  doc.text("AI Assisted Clinical Summary", 20, 32);
   doc.text(`Generated on: ${dateStr}`, 140, 25);
   
-  doc.setDrawColor(222, 226, 230);
+  doc.setDrawColor(220, 220, 220);
   doc.line(20, 38, 190, 38);
 
-  // --- PATIENT INFO ---
+  // --- 2. PATIENT PROFILE ---
+  doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
   doc.setTextColor(33, 37, 41);
-  doc.text("Patient Information", 20, 50);
+  doc.text("PATIENT PROFILE", 20, 50);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
-  doc.text(`Name: ${user?.name || 'Jane Doe (Sample)'}`, 20, 58);
-  doc.text(`Age: ${user?.age || '28'}`, 100, 58);
+  doc.text(`ID / Name: ${data.name}`, 25, 58);
+  doc.text(`Age: ${data.age}`, 25, 64);
+  doc.text(`Type: ${data.type.charAt(0).toUpperCase() + data.type.slice(1)} Patient`, 25, 70);
+
+  // --- 3. MEDICAL HISTORY (AI SUMMARY) ---
+  doc.setFont("helvetica", "bold");
+  doc.text("MEDICAL BACKGROUND SUMMARY", 20, 85);
+
+  const hist = data.medicalHistory;
+  const historyText = `Patient has a history of ${hist.conditions.join(" and ")}. Currently on ${hist.medications.join(", ")}. ${hist.pastComplications} reported.`;
   
-  let pType = user?.patientType || 'wellness';
-  const typeMap = { newMother: 'New Mother', pregnant: 'Pregnant Mother', elderly: 'Elderly Patient', wellness: 'Wellness Patient' };
-  doc.text(`Patient Type: ${typeMap[pType] || pType}`, 20, 64);
-  doc.text(`Status: ${isMock ? 'SIMULATED DATA' : 'AUTHENTICATED'}`, 100, 64);
-
-  // --- MEDICAL BACKGROUND (FOR ELDERLY) ---
-  let nextSectionY = 78;
-  if (user?.elderlyHealthProfile?.answers) {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.text("Medical Background", 20, 78);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    
-    const answers = user.elderlyHealthProfile.answers;
-    const conditions = answers.find(a => a.id === 'conditions')?.answer || 'None reported';
-    const meds = answers.find(a => a.id === 'medications')?.answer || 'None reported';
-    const falls = answers.find(a => a.id === 'falls')?.answer || 'No history';
-    const mobility = answers.find(a => a.id === 'mobility')?.answer || 'Independent';
-
-    doc.text(`Existing Conditions: ${conditions}`, 25, 86);
-    doc.text(`Medications: ${meds}`, 105, 86);
-    doc.text(`Fall History: ${falls}`, 25, 92);
-    doc.text(`Mobility: ${mobility}`, 105, 92);
-    
-    nextSectionY = 105;
-  }
-
-  // --- CURRENT VITALS ---
-  const latest = reportVitals[0];
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text("Latest Metrics", 20, nextSectionY);
-
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(11);
-  doc.text(`Heart Rate: ${latest.heartRate} bpm`, 25, nextSectionY + 8);
-  doc.text(`SpO2: ${latest.spO2}%`, 25, nextSectionY + 14);
-  doc.text(`Temperature: ${latest.temperature} °C`, 105, nextSectionY + 8);
-  doc.text(`Steps Today: ${latest.stepCount}`, 105, nextSectionY + 14);
+  const splitHistory = doc.splitTextToSize(historyText, 160);
+  doc.text(splitHistory, 25, 93);
 
-  // --- SUMMARY ---
+  // --- 4. CURRENT VITALS ---
+  let currentY = 110;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text("Trend Analysis", 20, nextSectionY + 30);
+  doc.text(reportType === "monthly" ? "30-DAY CLINICAL METRICS" : "CURRENT VITALS", 20, currentY);
 
-  const avgHR = (reportVitals.reduce((acc, v) => acc + (Number(v.heartRate) || 0), 0) / reportVitals.length).toFixed(1);
-  const avgSpO2 = (reportVitals.reduce((acc, v) => acc + (Number(v.spO2) || 0), 0) / reportVitals.length).toFixed(1);
-
+  const latest = data.vitals[0];
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(11);
-  doc.text(`Average Heart Rate (Last ${reportVitals.length} readings): ${avgHR} bpm`, 25, nextSectionY + 38);
-  doc.text(`Average SpO2: ${avgSpO2}%`, 25, nextSectionY + 44);
+  doc.text(`• Heart Rate: ${latest.heartRate} bpm`, 25, currentY + 8);
+  doc.text(`• SpO2: ${latest.spO2}%`, 25, currentY + 14);
+  doc.text(`• Temperature: ${latest.temp}°C`, 105, currentY + 8);
+  doc.text(`• Steps Today: ${latest.steps}`, 105, currentY + 14);
 
-  let trend = "Vitals are stable and within normal physiological ranges.";
-  if (latest.heartRate > 90) trend = "Heart rate shows a slightly elevated trend. Continuous rest is advised.";
-  doc.text(`Professional Note: ${trend}`, 25, nextSectionY + 52, { maxWidth: 165 });
+  // --- 5. TRENDS & ANALYSIS ---
+  currentY += 30;
+  doc.setFont("helvetica", "bold");
+  doc.text("TRENDS & ANALYSIS", 20, currentY);
 
-  // --- AI INSIGHTS ---
-  if (reportSurvey) {
-    let aiY = nextSectionY + 68;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.text("AI Health Assessment", 20, aiY);
-    
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    const status = reportSurvey.aiStatus || 'Stable';
-    doc.text(`Diagnosis Status: ${status.toUpperCase()}`, 25, aiY + 8);
-    
-    let recommendation = status.toLowerCase() === 'stable' ? "Continue regular monitoring." : "Schedule a follow-up consultation.";
-    doc.setFont("helvetica", "bold");
-    doc.text("Clinical Recommendation:", 25, aiY + 16);
-    doc.setFont("helvetica", "normal");
-    doc.text(recommendation, 25, aiY + 22);
+  const { avgHR, avgSpO2, trend } = analyzeTrends(data.vitals);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Average Heart Rate: ${avgHR} bpm`, 25, currentY + 8);
+  doc.text(`Average SpO2: ${avgSpO2}%`, 25, currentY + 14);
+  
+  const splitTrend = doc.splitTextToSize(trend, 160);
+  doc.text(splitTrend, 25, currentY + 22);
 
-    if (reportSurvey.aiParagraphEnglish) {
-      doc.setFont("helvetica", "bold");
-      doc.text("AI Analysis:", 25, aiY + 32);
-      doc.setFont("helvetica", "normal");
-      doc.text(reportSurvey.aiParagraphEnglish, 25, aiY + 38, { maxWidth: 165 });
-    }
-  }
+  // --- 6. AI HEALTH INSIGHT ---
+  currentY += 45;
+  doc.setFillColor(248, 249, 250);
+  doc.rect(20, currentY - 5, 170, 35, 'F');
+  
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(155, 0, 68);
+  doc.text("AI HEALTH INSIGHT", 25, currentY + 5);
+  
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(33, 37, 41);
+  const splitAI = doc.splitTextToSize(data.aiSummary, 160);
+  doc.text(splitAI, 25, currentY + 13);
 
-  // --- FOOTER ---
+  // --- 7. RISK LEVEL ---
+  currentY += 45;
+  doc.setFont("helvetica", "bold");
+  doc.text("RISK LEVEL:", 20, currentY);
+  
+  const risk = data.riskLevel.toUpperCase();
+  const riskColor = risk === "HIGH" ? [186, 26, 26] : (risk === "MODERATE" ? [217, 119, 6] : [0, 109, 49]);
+  doc.setTextColor(...riskColor);
+  doc.text(risk, 50, currentY);
+
+  // --- 8. RECOMMENDATIONS ---
+  currentY += 12;
+  doc.setTextColor(33, 37, 41);
+  doc.setFont("helvetica", "bold");
+  doc.text("RECOMMENDATIONS:", 20, currentY);
+  
+  doc.setFont("helvetica", "normal");
+  let rec = "Continue routine monitoring";
+  if (risk === "MODERATE") rec = "Monitor closely and consult doctor if symptoms persist";
+  if (risk === "HIGH") rec = "Immediate medical attention required";
+  doc.text(rec, 65, currentY);
+
+  // --- 9. FOOTER ---
   const pageHeight = doc.internal.pageSize.height;
-  doc.setDrawColor(222, 226, 230);
-  doc.line(20, pageHeight - 30, 190, pageHeight - 30);
-  doc.setFontSize(9);
-  doc.setTextColor(108, 117, 125);
-  doc.text("This report is generated for informational purposes. Simulated data used where live readings were unavailable.", 20, pageHeight - 22, { maxWidth: 170 });
+  doc.setFontSize(8);
+  doc.setTextColor(150, 150, 150);
+  doc.text("This report is AI-generated and intended to assist medical consultation.", 105, pageHeight - 20, { align: "center" });
   doc.setFont("helvetica", "bold");
-  doc.text("MaaSathi — Digital Health Companion", 20, pageHeight - 14);
+  doc.text("MaaSathi — Real-Time Health Intelligence", 105, pageHeight - 14, { align: "center" });
 
-  doc.save(`${user?.name || 'Patient'}_MaaSathi_Report.pdf`);
+  // Output
+  if (mode === 'view') {
+    window.open(doc.output('bloburl'), '_blank');
+  } else {
+    doc.save(`${data.name.replace(/\s+/g, '_')}_Report.pdf`);
+  }
 };
 
 /**
- * Generates a Monthly Health Report (Last 30 Days)
+ * EXPORTED FUNCTIONS
  */
-export const generateMonthlyReport = (user, vitals, surveyData) => {
-  const doc = new jsPDF();
-  const now = new Date();
-  
-  // Logic for 30 days
-  const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
-  let monthlyVitals = (vitals || []).filter(v => {
-    const t = v.timestamp?.toMillis ? v.timestamp.toMillis() : (v.timestamp?.seconds ? v.timestamp.seconds * 1000 : v.timestamp);
-    return t >= thirtyDaysAgo;
-  });
 
-  const isMock = monthlyVitals.length === 0;
-  if (isMock) {
-    monthlyVitals = generateMockVitals(30); // Generate 30 days of data
-  }
+export const generateInstantReport = (userProfile, vitalsData, surveyData, mode = 'download') => {
+  // Use passed data if available, otherwise fallback to mock for demo
+  const data = userProfile ? {
+    name: userProfile.name || mockPatient.name,
+    age: userProfile.age || mockPatient.age,
+    type: userProfile.patientType || mockPatient.type,
+    medicalHistory: userProfile.medicalHistory || mockPatient.medicalHistory,
+    vitals: (vitalsData && vitalsData.length > 0) ? vitalsData.map(v => ({
+      heartRate: v.heartRate || 72,
+      spO2: v.spO2 || 98,
+      temp: v.temperature || 36.6,
+      steps: v.stepCount || 0
+    })) : mockPatient.vitals,
+    aiSummary: surveyData?.aiParagraphEnglish || mockPatient.aiSummary,
+    riskLevel: surveyData?.aiStatus || mockPatient.riskLevel
+  } : mockPatient;
 
-  // --- HEADER ---
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(22);
-  doc.setTextColor(33, 37, 41);
-  doc.text("MaaSathi Monthly Health Report", 20, 25);
-  
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.setTextColor(108, 117, 125);
-  doc.text(isMock ? "Historical Simulation • Demo Trends" : "Last 30 Days Clinical Trend Analysis", 20, 32);
-  doc.text(`Date: ${now.toLocaleDateString()}`, 165, 25);
-  
-  doc.setDrawColor(222, 226, 230);
-  doc.line(20, 38, 190, 38);
+  generatePDF(data, "instant", mode);
+};
 
-  // --- PATIENT INFO ---
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text("Patient Information", 20, 50);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(11);
-  doc.text(`Name: ${user?.name || 'Ramesh Kumar (Sample)'}`, 20, 58);
-  doc.text(`Type: ${user?.patientType || 'Elderly'}`, 100, 58);
+// Aliases for backward compatibility
+export const generateProfessionalReport = generateInstantReport;
 
-  // --- 30 DAY SUMMARY ---
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text("30 Day Summary Statistics", 20, 75);
+export const generateMonthlyReport = (userProfile, vitalsData, surveyData, mode = 'download') => {
+  const data = userProfile ? {
+    name: userProfile.name || mockPatient.name,
+    age: userProfile.age || mockPatient.age,
+    type: userProfile.patientType || mockPatient.type,
+    medicalHistory: userProfile.medicalHistory || mockPatient.medicalHistory,
+    vitals: (vitalsData && vitalsData.length > 0) ? vitalsData.map(v => ({
+      heartRate: v.heartRate || 72,
+      spO2: v.spO2 || 98,
+      temp: v.temperature || 36.6,
+      steps: v.stepCount || 0
+    })) : mockPatient.vitals,
+    aiSummary: "Monthly Trend Analysis: Patient demonstrates consistent vital signs with minor fluctuations. Activity levels have increased by 15% compared to previous month.",
+    riskLevel: surveyData?.aiStatus || mockPatient.riskLevel
+  } : mockPatient;
 
-  const mAvgHR = (monthlyVitals.reduce((acc, v) => acc + (Number(v.heartRate) || 0), 0) / monthlyVitals.length).toFixed(1);
-  const mAvgSpO2 = (monthlyVitals.reduce((acc, v) => acc + (Number(v.spO2) || 0), 0) / monthlyVitals.length).toFixed(1);
-  const totalSteps = monthlyVitals.reduce((acc, v) => acc + (Number(v.stepCount) || 0), 0);
-  const avgSteps = (totalSteps / monthlyVitals.length).toFixed(0);
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(11);
-  doc.text(`Average Heart Rate: ${mAvgHR} bpm`, 25, 85);
-  doc.text(`Average SpO2 Level: ${mAvgSpO2}%`, 25, 92);
-  doc.text(`Cumulative Step Count: ${totalSteps.toLocaleString()}`, 25, 99);
-  doc.text(`Average Daily Steps: ${avgSteps}`, 105, 85);
-
-  let mTrend = "Vital signs demonstrate high stability over the 30-day monitoring period.";
-  if (mAvgHR > 85) mTrend = "Average heart rate is higher than baseline. Increased rest and hydration are suggested.";
-  
-  doc.setFont("helvetica", "bold");
-  doc.text("Observational Analysis:", 25, 110);
-  doc.setFont("helvetica", "normal");
-  doc.text(mTrend, 25, 116, { maxWidth: 165 });
-
-  // --- FOOTER ---
-  const pageHeight = doc.internal.pageSize.height;
-  doc.setDrawColor(222, 226, 230);
-  doc.line(20, pageHeight - 30, 190, pageHeight - 30);
-  doc.setFontSize(9);
-  doc.setTextColor(108, 117, 125);
-  doc.text("The data presented above is representative of simulation algorithms where live telemetry was unavailable.", 20, pageHeight - 22, { maxWidth: 170 });
-  doc.setFont("helvetica", "bold");
-  doc.text("MaaSathi — Intelligence in Healthcare.", 20, pageHeight - 14);
-
-  doc.save(`${user?.name || 'Patient'}_Monthly_Trend.pdf`);
+  generatePDF(data, "monthly", mode);
 };

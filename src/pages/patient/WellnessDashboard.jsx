@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  FaHeartbeat, FaWalking, FaFilePdf, FaDownload, 
-  FaPhone, FaBatteryThreeQuarters, FaChevronRight, 
-  FaBroadcastTower, FaUserNurse, FaRunning, FaBed, 
-  FaAppleAlt, FaBrain, FaWeight, FaSyringe, FaShieldAlt,
-  FaChartLine, FaRobot, FaCalendarCheck
+  FaHeartbeat, FaWalking, FaFilePdf, FaDownload, FaEye,
+  FaBatteryThreeQuarters, FaBroadcastTower, FaRunning, FaBed, 
+  FaAppleAlt, FaBrain, FaChartLine, FaRobot, FaCalendarCheck
 } from 'react-icons/fa';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, CartesianGrid } from 'recharts';
@@ -14,8 +12,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../context/ThemeContext';
 import { useVitals } from '../../hooks/useVitals';
-import { useSurveys } from '../../hooks/useSurveys';
-import { generateInstantReport, generateMonthlyReport } from '../../utils/generatePdfReport';
+import { generateProfessionalReport } from '../../utils/generatePdfReport';
 
 const STEP_GOAL = 10000;
 
@@ -40,29 +37,20 @@ const WellnessDashboard = () => {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const name = (profile?.name || 'User').split(' ')[0];
-
   const { vitals: firestoreVitals, latestVitals: firestoreLatest } = useVitals(profile?.uid);
   
   const currentSteps = firestoreLatest?.stepCount || 6420;
   const mockTrends = generateMockWellnessTrends(7);
 
-  const generatePDF = async (type) => {
+  const generatePDF = async (type = 'instant', mode = 'download') => {
     setIsGenerating(true);
     try {
-      if (type === 'instant') {
-        generateInstantReport(profile, firestoreVitals, null);
-      } else {
-        generateMonthlyReport(profile, firestoreVitals, null);
-      }
+      generateProfessionalReport(profile, firestoreVitals, null, mode, type);
     } catch (err) {
       console.error("PDF generation error:", err);
     } finally {
       setIsGenerating(false);
     }
-  };
-
-  const handleSendToDoctor = () => {
-     alert("Your Wellness Summary has been shared with your linked health coach!");
   };
 
   const t = {
@@ -71,14 +59,16 @@ const WellnessDashboard = () => {
       vitals: 'My Wellness Stats', ring: 'Ring Connected',
       steps: 'STEPS', goal: 'Daily Goal', activity: 'Activity',
       sleep: 'Sleep Quality', stress: 'Stress Level', diet: 'Diet',
-      analytics: 'Weekly Step Trends', insights: 'Daily Wellness Tip'
+      analytics: 'Weekly Step Trends', insights: 'Daily Wellness Tip',
+      view: 'View PDF', download: 'Download Summary', share: 'Share with Health Coach'
     },
     te: {
       subtitle: 'మీ ఆరోగ్య లక్ష్యాలను చేరుకోండి',
       vitals: 'నా వెల్నెస్ గణాంకాలు', ring: 'రింగ్ కనెక్ట్ చేయబడింది',
       steps: 'అడుగులు', goal: 'రోజువారీ లక్ష్యం', activity: 'కార్యాచరణ',
       sleep: 'నిద్ర నాణ్యత', stress: 'ఒత్తిడి స్థాయి', diet: 'ఆహారం',
-      analytics: 'వారపు అడుగుల ట్రెండ్స్', insights: 'రోజువారీ వెల్నెస్ చిట్కా'
+      analytics: 'వారపు అడుగుల ట్రెండ్స్', insights: 'రోజువారీ వెల్నెస్ చిట్కా',
+      view: 'మొత్తం చూడండి', download: 'సారాంశం డౌన్‌లోడ్', share: 'హెల్త్ కోచ్‌తో షేర్ చేయండి'
     }
   };
   const text = t[language] || t.en;
@@ -96,7 +86,6 @@ const WellnessDashboard = () => {
         </div>
       </header>
 
-      {/* Ring Connected Strip */}
       <div style={{ margin: '16px 24px', padding: '12px 20px', background: 'var(--surface)', border: '1.5px solid var(--success-light)', borderRadius: 'var(--radius-lg)', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: 'var(--shadow-sm)' }}>
         <FaBroadcastTower color="var(--success)" className="animate-pulse" />
         <span style={{ fontWeight: 600, color: 'var(--success)', flex: 1 }}>{text.ring}</span>
@@ -106,7 +95,6 @@ const WellnessDashboard = () => {
         </div>
       </div>
 
-      {/* Step Goal Card */}
       <div style={{ padding: '0 24px' }}>
           <div style={{ background: 'var(--surface)', padding: '24px', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-md)' }}>
              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '16px' }}>
@@ -122,34 +110,26 @@ const WellnessDashboard = () => {
              <div style={{ height: '14px', background: 'var(--bg-secondary)', borderRadius: '100px', overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${Math.min((currentSteps/STEP_GOAL)*100, 100)}%`, background: 'var(--accent)', borderRadius: '100px', transition: 'width 1s ease-out' }} />
              </div>
-             <div style={{ marginTop: '12px', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>
-                {currentSteps >= STEP_GOAL ? "Awesome! You've hit your daily goal! 🚀" : `Keep going! ${ (STEP_GOAL - currentSteps).toLocaleString() } steps to reach your goal.`}
-             </div>
           </div>
       </div>
 
-      {/* Wellness Grid */}
       <div style={{ padding: '24px 24px 0 24px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
           {[
-            { icon: FaBed, color: 'var(--info)', label: text.sleep, val: '7.2 hrs', sub: 'Deep Sleep' },
-            { icon: FaBrain, color: 'var(--warning)', label: text.stress, val: 'Optimal', sub: 'Low Stress' },
-            { icon: FaRunning, color: 'var(--accent)', label: text.activity, val: 'High', sub: '45 mins active' },
-            { icon: FaAppleAlt, color: 'var(--success)', label: text.diet, val: 'Balanced', sub: '1,850 kcal' }
+            { icon: FaBed, color: 'var(--info)', label: text.sleep, val: '7.2 hrs' },
+            { icon: FaBrain, color: 'var(--warning)', label: text.stress, val: 'Optimal' },
+            { icon: FaRunning, color: 'var(--accent)', label: text.activity, val: 'High' },
+            { icon: FaAppleAlt, color: 'var(--success)', label: text.diet, val: 'Balanced' }
           ].map((item, i) => (
             <div key={i} style={{ background: 'var(--surface)', padding: '18px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <item.icon color={item.color} size={18} />
                   <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)' }}>{item.label}</span>
                </div>
-               <div>
-                  <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)' }}>{item.val}</div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 600 }}>{item.sub}</div>
-               </div>
+               <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)' }}>{item.val}</div>
             </div>
           ))}
       </div>
 
-      {/* Analytics Chart */}
       <div style={{ margin: '24px', padding: '20px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)' }}>
          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
             <FaChartLine color="var(--accent)" />
@@ -167,26 +147,24 @@ const WellnessDashboard = () => {
          </div>
       </div>
 
-      {/* Daily Tip */}
-      <div style={{ margin: '0 24px 24px 24px', padding: '20px', background: 'var(--accent-subtle)', border: '1px solid var(--accent-light)', borderRadius: 'var(--radius-xl)', display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-          <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-             <FaRobot color="var(--accent)" size={22} />
+      <div style={{ padding: '0 24px 40px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <button 
+              onClick={() => generatePDF('instant', 'download')}
+              style={{ height: '56px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '16px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 4px 15px rgba(194, 24, 91, 0.2)' }}
+            >
+              <FaDownload /> {text.download}
+            </button>
+            <button 
+              onClick={() => generatePDF('instant', 'view')}
+              style={{ height: '56px', background: 'white', color: 'var(--accent)', border: '1.5px solid var(--accent)', borderRadius: '16px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+            >
+              <FaEye /> {text.view}
+            </button>
           </div>
-          <div>
-             <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--accent)', textTransform: 'uppercase', marginBottom: '4px' }}>{text.insights}</div>
-             <div style={{ fontSize: '14px', color: 'var(--text-primary)', fontWeight: 500, lineHeight: 1.5 }}>
-                Try walking for 10 minutes after your lunch today. It can help improve digestion and keep your energy levels stable.
-             </div>
-          </div>
-      </div>
 
-      {/* Action Buttons */}
-      <div style={{ padding: '0 24px 40px 24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <button onClick={() => generatePDF('instant')} disabled={isGenerating} style={{ height: '56px', background: 'var(--accent)', color: 'white', borderRadius: 'var(--radius-md)', border: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 4px 15px rgba(194, 24, 91, 0.2)' }}>
-            <FaDownload /> {isGenerating ? 'Preparing...' : 'Download Weekly Summary'}
-          </button>
-          <button onClick={handleSendToDoctor} style={{ height: '56px', background: 'white', color: 'var(--success)', borderRadius: 'var(--radius-md)', border: '1.5px solid var(--success)', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-            <FaCalendarCheck /> Share with Health Coach
+          <button onClick={() => alert("Summary shared!")} style={{ height: '56px', background: '#ffffff', color: 'var(--success)', border: '2.5px solid var(--success)', borderRadius: '16px', fontWeight: 800, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(0, 109, 49, 0.08)' }}>
+            <FaCalendarCheck size={18} /> {text.share}
           </button>
       </div>
     </PatientLayout>

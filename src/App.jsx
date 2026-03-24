@@ -100,6 +100,11 @@ function App() {
         {/* Caretaker & Family Routes */}
         <Route path="/caretaker-type" element={<CaretakerTypeSelect />} />
         <Route path="/family-dashboard" element={<FamilyDashboard />} />
+        <Route path="/family-patients" element={<FamilyDashboard />} />
+        <Route path="/family-alerts" element={<FamilyDashboard />} />
+        <Route path="/family-reports" element={<FamilyDashboard />} />
+        <Route path="/family-profile" element={<FamilyDashboard />} />
+        <Route path="/family-vitals" element={<MotherVitalsScreen />} />
 
         {/* Shared / Global Routes */}
         <Route path="/shared/ai-report" element={<AIReportResultScreen />} />

@@ -3,6 +3,7 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { FaArrowLeft, FaFilePdf, FaDownload, FaUser, FaCheckCircle, FaPlay } from 'react-icons/fa';
 import MotherLayout from '../../layouts/MotherLayout';
 import { useLanguage } from '../../context/LanguageContext';
+import { generateInstantReport } from '../../utils/generatePdfReport';
 
 const MotherReportViewerScreen = () => {
   const navigate = useNavigate();
@@ -41,6 +42,17 @@ const MotherReportViewerScreen = () => {
       ]
     },
     voiceNoteText: "Patient mentions back pain is worse at night. Swelling started 2 days ago."
+  };
+
+  const handleDownload = () => {
+    const user = { 
+      name: report.name, 
+      age: dummyData.age, 
+      patientType: 'pregnant',
+      phc: dummyData.village
+    };
+    const survey = { aiStatus: report.urgency };
+    generateInstantReport(user, [], survey, 'download');
   };
 
   const t = {
@@ -178,9 +190,9 @@ const MotherReportViewerScreen = () => {
 
         {/* Voice Note Placeholder */}
         <div style={sectionStyle}>
-           <div style={{ display: 'flex', itemsCenter: 'center', gap: '10px', opacity: 0.6 }}>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', opacity: 0.6 }}>
              <FaPlay size={12} color="var(--text-tertiary)" />
-             <span style={{ fontSize: '13px', italic: 'true', color: 'var(--text-tertiary)' }}>
+             <span style={{ fontSize: '13px', fontStyle: 'italic', color: 'var(--text-tertiary)' }}>
                "Voice recording attached by ASHA worker..."
              </span>
            </div>
@@ -188,7 +200,7 @@ const MotherReportViewerScreen = () => {
 
         {/* Download Button */}
         <button
-          onClick={() => alert("PDF Download started...")}
+          onClick={handleDownload}
           style={{
             width: '100%', height: '52px', background: 'var(--accent)', color: 'white',
             border: 'none', borderRadius: 'var(--radius-md)', fontSize: '16px', fontWeight: 700,

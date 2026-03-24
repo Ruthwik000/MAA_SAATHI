@@ -72,6 +72,17 @@ export const AuthProvider = ({ children }) => {
     return unsubscribe;
   }, []);
 
+  // Safety loading timeout to prevent permanent blank screen on Firebase connection issues
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (loading) {
+        console.warn('Firebase connection taking too long. Forcing app initialization.');
+        setLoading(false);
+      }
+    }, 3000); // 3 second grace period
+    return () => clearTimeout(timer);
+  }, [loading]);
+
   const loginWithGoogle = async () => {
     try {
       const provider = new GoogleAuthProvider();

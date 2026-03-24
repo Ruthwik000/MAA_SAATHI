@@ -7,7 +7,7 @@ export function useAlerts(role = 'asha', id = null) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id && role !== 'admin') return;
+    if (!id && role !== 'admin' && role !== 'doctor') return;
 
     let q = query(collection(db, 'alerts'), where('status', '==', 'active'), orderBy('createdAt', 'desc'));
 

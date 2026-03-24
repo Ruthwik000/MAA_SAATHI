@@ -4,7 +4,7 @@ import {
   FaArrowLeft, FaCalendarAlt, FaHeartbeat, FaPills, 
   FaWalking, FaUserFriends, FaBrain, FaLungs, 
   FaExclamationCircle, FaMagic, FaCheck, FaMicrophone, FaStop,
-  FaBed, FaStethoscope, FaSleepyhead, FaRunning
+  FaBed, FaStethoscope, FaRunning
 } from 'react-icons/fa';
 import { MdOutlineBrightness4, MdOutlineBedtime } from 'react-icons/md';
 import { useLanguage } from '../../context/LanguageContext';
