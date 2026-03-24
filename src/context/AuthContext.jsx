@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect } from 'react';
 import { auth, db } from '../config/firebase';
 import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { COLLECTIONS, validateFirestoreDocument } from '../config/firebaseSchema';
 
 export const AuthContext = createContext();
 
@@ -47,7 +48,7 @@ export const AuthProvider = ({ children }) => {
       if (authUser) {
         setUser(authUser);
         try {
-          const profileRef = doc(db, 'users', authUser.uid);
+          const profileRef = doc(db, COLLECTIONS.users, authUser.uid);
           const profileSnap = await getDoc(profileRef);
 
           if (profileSnap.exists()) {
@@ -89,7 +90,7 @@ export const AuthProvider = ({ children }) => {
       const result = await signInWithPopup(auth, provider);
 
       const loggedInUser = result.user;
-      const profileRef = doc(db, 'users', loggedInUser.uid);
+      const profileRef = doc(db, COLLECTIONS.users, loggedInUser.uid);
 
       try {
         const profileSnap = await getDoc(profileRef);
@@ -138,7 +139,8 @@ export const AuthProvider = ({ children }) => {
       updatedAt: serverTimestamp()
     };
 
-    const profileRef = doc(db, 'users', user.uid);
+    const profileRef = doc(db, COLLECTIONS.users, user.uid);
+    validateFirestoreDocument('users', profileData);
     await setDoc(profileRef, profileData);
 
     setProfile(profileData);
@@ -153,13 +155,15 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfile = async (data) => {
     if (!user) return;
-    const profileRef = doc(db, 'users', user.uid);
+    const profileRef = doc(db, COLLECTIONS.users, user.uid);
+    const profilePatch = {
+      ...data,
+      updatedAt: serverTimestamp()
+    };
+    validateFirestoreDocument('users', profilePatch, { partial: true });
     await setDoc(
       profileRef,
-      {
-        ...data,
-        updatedAt: serverTimestamp()
-      },
+      profilePatch,
       { merge: true }
     );
 

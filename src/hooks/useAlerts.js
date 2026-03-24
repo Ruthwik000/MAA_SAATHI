@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { db } from '../config/firebase';
 import { collection, query, where, onSnapshot, orderBy, doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { COLLECTIONS, validateFirestoreDocument } from '../config/firebaseSchema';
 
 export function useAlerts(role = 'asha', id = null) {
   const [alerts, setAlerts] = useState([]);
@@ -9,16 +10,30 @@ export function useAlerts(role = 'asha', id = null) {
   useEffect(() => {
     if (!id && role !== 'admin' && role !== 'doctor') return;
 
-    let q = query(collection(db, 'alerts'), where('status', '==', 'active'), orderBy('createdAt', 'desc'));
+    let q = query(
+      collection(db, COLLECTIONS.alerts),
+      where('status', '==', 'active'),
+      orderBy('createdAt', 'desc')
+    );
 
     // Filter by ASHA for worker dashboard
     if (role === 'asha' && id) {
-      q = query(collection(db, 'alerts'), where('ashaWorkerId', '==', id), where('status', '==', 'active'), orderBy('createdAt', 'desc'));
+      q = query(
+        collection(db, COLLECTIONS.alerts),
+        where('ashaWorkerId', '==', id),
+        where('status', '==', 'active'),
+        orderBy('createdAt', 'desc')
+      );
     }
 
     // Filter by Doctor for PHC dashboard
     if (role === 'doctor' && id) {
-      q = query(collection(db, 'alerts'), where('doctorId', '==', id), where('status', '==', 'active'), orderBy('createdAt', 'desc'));
+      q = query(
+        collection(db, COLLECTIONS.alerts),
+        where('doctorId', '==', id),
+        where('status', '==', 'active'),
+        orderBy('createdAt', 'desc')
+      );
     }
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -33,27 +48,31 @@ export function useAlerts(role = 'asha', id = null) {
   }, [id, role]);
 
   const resolveAlert = async (alertId) => {
-    const alertRef = doc(db, 'alerts', alertId);
+    const alertRef = doc(db, COLLECTIONS.alerts, alertId);
     const alertSnap = await getDoc(alertRef);
     if (alertSnap.exists()) {
-      await setDoc(alertRef, {
+      const updateDocPayload = {
         status: 'resolved',
         resolvedAt: serverTimestamp(),
         id: alertId
-      }, { merge: true });
+      };
+      validateFirestoreDocument('alerts', updateDocPayload, { partial: true });
+      await setDoc(alertRef, updateDocPayload, { merge: true });
     }
     return alertId;
   };
 
   const createSOSAlert = async (data) => {
-    const alertRef = doc(collection(db, 'alerts'));
-    await setDoc(alertRef, {
+    const alertRef = doc(collection(db, COLLECTIONS.alerts));
+    const alertDoc = {
       id: alertRef.id,
       ...data,
       type: 'sos',
       status: 'active',
       createdAt: serverTimestamp()
-    });
+    };
+    validateFirestoreDocument('alerts', alertDoc);
+    await setDoc(alertRef, alertDoc);
     return alertRef.id;
   };
 

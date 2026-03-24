@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { db } from '../config/firebase';
 import { collection, query, where, onSnapshot, orderBy, limit, addDoc, serverTimestamp } from 'firebase/firestore';
+import { COLLECTIONS, validateFirestoreDocument } from '../config/firebaseSchema';
 
 export function useVitals(patientId) {
   const [vitals, setVitals] = useState([]);
@@ -12,7 +13,7 @@ export function useVitals(patientId) {
 
     // Latest Vitls (Timeline view for Dashboards)
     const q = query(
-      collection(db, 'vitals'),
+      collection(db, COLLECTIONS.vitals),
       where('patientId', '==', patientId),
       orderBy('timestamp', 'desc'),
       limit(20)
@@ -33,13 +34,15 @@ export function useVitals(patientId) {
 
   const addVitalsManually = async (data) => {
     if (!patientId) return;
-    const vitalsRef = collection(db, 'vitals');
-    await addDoc(vitalsRef, {
+    const vitalsRef = collection(db, COLLECTIONS.vitals);
+    const vitalsDoc = {
       patientId,
       ...data,
       source: 'manual',
       timestamp: serverTimestamp()
-    });
+    };
+    validateFirestoreDocument('vitals', vitalsDoc);
+    await addDoc(vitalsRef, vitalsDoc);
   };
 
   return { vitals, latestVitals, loading, addVitalsManually };

@@ -1,9 +1,19 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { fileURLToPath } from 'url'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  resolve: {
+    alias: [
+      {
+        // Exact-match alias: adds a compatibility export for FaSleepyhead.
+        find: /^react-icons\/fa$/,
+        replacement: fileURLToPath(new URL('./src/utils/react-icons-fa-compat.js', import.meta.url))
+      }
+    ]
+  },
   server: {
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin-allow-popups'
