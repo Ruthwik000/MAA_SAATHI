@@ -246,12 +246,6 @@ const AshaDashboard = () => {
                 ...(language === 'te' ? { background: 'var(--accent)', color: 'white', borderColor: 'var(--accent)' } : { background: 'transparent', color: 'var(--text-secondary)' })
               }}>TE</button>
             </div>
-            <button onClick={toggleTheme} style={{
-              width: '36px', height: '36px', borderRadius: '50%', background: 'var(--bg-secondary)',
-              border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-secondary)'
-            }}>
-              {theme === 'light' ? <MdOutlineDarkMode size={18} /> : <MdOutlineLightMode size={18} />}
-            </button>
             {/* Avatar — shows photo if available, initials otherwise */}
             <div
               onClick={() => navigate('/asha/profile')}

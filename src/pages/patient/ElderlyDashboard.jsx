@@ -40,6 +40,12 @@ const ElderlyDashboard = () => {
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [latestAlert, setLatestAlert] = useState(null);
+  
+  useEffect(() => {
+    if (profile && profile.isSurveyCompleted === false) {
+      navigate('/elderly/health-survey');
+    }
+  }, [profile, navigate]);
 
   const { vitals: firestoreVitals, latestVitals: firestoreLatest } = useVitals(profile?.uid);
   
@@ -129,8 +135,7 @@ const ElderlyDashboard = () => {
           <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{text.subtitle}</div>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button onClick={() => toggleLanguage(language === 'en' ? 'te' : 'en')} style={{ padding: '6px 12px', borderRadius: '100px', border: '1px solid var(--border)', fontWeight: 600 }}>{language.toUpperCase()}</button>
-          <button onClick={toggleTheme} style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--bg-secondary)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{theme === 'light' ? <MdOutlineDarkMode /> : <MdOutlineLightMode />}</button>
+          <button onClick={() => toggleLanguage(language === 'en' ? 'te' : 'en')} style={{ padding: '6px 12px', borderRadius: '100px', border: '1px solid var(--border)', fontWeight: 600, cursor: 'pointer', background: 'transparent' }}>{language.toUpperCase()}</button>
         </div>
       </header>
 

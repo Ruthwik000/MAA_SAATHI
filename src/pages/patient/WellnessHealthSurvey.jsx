@@ -156,7 +156,8 @@ const WellnessHealthSurvey = () => {
       if (user?.uid) {
         await updateDoc(doc(db, 'users', user.uid), {
           wellnessProfile: profile,
-          patientType: 'wellness'
+          patientType: 'wellness',
+          isSurveyCompleted: true
         });
       }
       setTimeout(() => navigate('/dashboard/wellness'), 1500);

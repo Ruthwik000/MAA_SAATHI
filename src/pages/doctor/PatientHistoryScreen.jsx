@@ -46,7 +46,6 @@ const PatientHistoryScreen = () => {
   const [activeFilter, setActiveFilter] = useState('All');
   const [expandedId, setExpandedId]     = useState(null);
   const [search, setSearch]             = useState('');
-  const [selectedReport, setSelectedReport] = useState(null);
 
   const t = {
     en: {
@@ -103,7 +102,7 @@ const PatientHistoryScreen = () => {
   };
 
   const openReportDetail = (p, s) => {
-    setSelectedReport({ patient: p, survey: s });
+    navigate(`/report/${s.id}`);
   };
 
   return (
@@ -205,65 +204,8 @@ const PatientHistoryScreen = () => {
         })}
       </div>
 
-      {/* ── REPORT DETAIL MODAL ── */}
-      {selectedReport && (
-        <div className="modal-overlay" onClick={() => setSelectedReport(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
-              <div>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase' }}>{selectedReport.survey.type}</span>
-                <h2 style={{ fontSize: '24px', fontWeight: 800, margin: '4px 0 0 0' }}>{selectedReport.patient.name}</h2>
-              </div>
-              <button onClick={() => setSelectedReport(null)} style={{ background: 'var(--bg-secondary)', border: 'none', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer' }}>
-                <FaTimes color="var(--text-secondary)" />
-              </button>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '32px' }}>
-               <div>
-                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '4px' }}>PHC Station</div>
-                  <div style={{ fontSize: '14px', fontWeight: 600 }}>{selectedReport.patient.village} PHC</div>
-               </div>
-               <div>
-                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '4px' }}>Status</div>
-                  <div style={{ fontSize: '14px', fontWeight: 700, color: (riskStyles[selectedReport.survey.result] || riskStyles.STABLE).color }}>{selectedReport.survey.result}</div>
-               </div>
-            </div>
-
-            <div style={{ background: 'var(--bg-secondary)', borderRadius: '20px', padding: '20px', marginBottom: '24px' }}>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                  <FaRobot color="var(--accent)" />
-                  <span style={{ fontSize: '14px', fontWeight: 700 }}>{text.aiSummary}</span>
-               </div>
-               <p style={{ fontSize: '14px', color: 'var(--text-primary)', lineHeight: 1.6, margin: 0 }}>
-                  Analysis of {selectedReport.survey.type} from {selectedReport.survey.date} confirms {selectedReport.survey.result.toLowerCase()} patient state. Patient history suggests consistent vitals with minor spikes in activity levels. 
-                  {selectedReport.survey.result === 'CRITICAL' ? " Immediate review of BP telemetry is required." : " Continue scheduled monitoring."}
-               </p>
-            </div>
-
-            <div style={{ marginBottom: '32px' }}>
-               <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '12px' }}>{text.vitalsSection}</div>
-               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div style={{ border: '1px solid var(--border)', borderRadius: '12px', padding: '12px' }}>
-                     <div style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>Heart Rate</div>
-                     <div style={{ fontSize: '16px', fontWeight: 700 }}>78 bpm</div>
-                  </div>
-                  <div style={{ border: '1px solid var(--border)', borderRadius: '12px', padding: '12px' }}>
-                     <div style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>Blood Oxygen</div>
-                     <div style={{ fontSize: '16px', fontWeight: 700 }}>98%</div>
-                  </div>
-               </div>
-            </div>
-
-            <button 
-              onClick={() => handleDownloadReport(selectedReport.patient, selectedReport.survey)}
-              style={{ width: '100%', height: '56px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '16px', fontSize: '15px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', boxShadow: '0 8px 24px rgba(155, 0, 68, 0.15)' }}
-            >
-              <FaFilePdf /> {text.download} PDF Report
-            </button>
-          </div>
-        </div>
-      )}
+      {/* ── FOOTER SPACING ── */}
+      <div style={{ height: '40px' }} />
     </DoctorLayout>
   );
 };

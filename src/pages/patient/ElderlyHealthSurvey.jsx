@@ -188,7 +188,8 @@ const ElderlyHealthSurvey = () => {
             aiParagraphEnglish,
             updatedAt: new Date().toISOString()
           },
-          patientType: 'elderly'
+          patientType: 'elderly',
+          isSurveyCompleted: true
         });
 
         // Add to reports collection for record keeping

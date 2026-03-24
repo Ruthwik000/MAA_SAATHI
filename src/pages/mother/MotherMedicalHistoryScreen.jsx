@@ -248,7 +248,8 @@ export default function MotherMedicalHistoryScreen() {
         await updateProfile({
           ...profile,
           medicalHistory: answers,
-          medicalHistoryOther: otherText
+          medicalHistoryOther: otherText,
+          isSurveyCompleted: true
         });
       }
       setToast(ui.saved);

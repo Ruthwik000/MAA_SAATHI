@@ -123,7 +123,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const setupRole = async (role, patientType = '') => {
+  const setupRole = async (role, patientType = '', isSurveyCompleted = false) => {
     if (!user) throw new Error('No user authenticated');
 
     const profileData = {
@@ -133,6 +133,7 @@ export const AuthProvider = ({ children }) => {
       photoURL: user.photoURL || '',
       role,
       patientType,
+      isSurveyCompleted,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };

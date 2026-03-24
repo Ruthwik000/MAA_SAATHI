@@ -38,9 +38,14 @@ import ElderlyHealthSurvey from './pages/patient/ElderlyHealthSurvey';
 import WellnessHealthSurvey from './pages/patient/WellnessHealthSurvey';
 import ElderlyDashboard from './pages/patient/ElderlyDashboard';
 import WellnessDashboard from './pages/patient/WellnessDashboard';
-import CaretakerDashboard from './pages/caretaker/CaretakerDashboard';
-import CaretakerTypeSelect from './pages/auth/CaretakerTypeSelect';
+import CaretakerType from './pages/auth/CaretakerType';
 import FamilyDashboard from './pages/family/FamilyDashboard';
+import CaretakerVitals from './pages/caretaker/CaretakerVitals';
+import CaretakerReports from './pages/caretaker/CaretakerReports';
+import CaretakerAlerts from './pages/caretaker/CaretakerAlerts';
+import CaretakerProfile from './pages/caretaker/CaretakerProfile';
+
+import ReportViewer from './pages/shared/ReportViewer';
 
 import RingAlertScreen from './pages/shared/RingAlertScreen';
 import SettingsScreen from './pages/shared/SettingsScreen';
@@ -63,7 +68,6 @@ function App() {
         {/* Dashboards */}
         <Route path="/dashboard/elderly" element={<ElderlyDashboard />} />
         <Route path="/dashboard/wellness" element={<WellnessDashboard />} />
-        <Route path="/dashboard/caretaker" element={<CaretakerDashboard />} />
         
         {/* ASHA Routes */}
         <Route path="/asha/dashboard" element={<AshaDashboard />} />
@@ -98,16 +102,20 @@ function App() {
         <Route path="/mother/health-history" element={<MotherMedicalHistoryScreen />} />
 
         {/* Caretaker & Family Routes */}
-        <Route path="/caretaker-type" element={<CaretakerTypeSelect />} />
+        <Route path="/caretaker-type" element={<CaretakerType />} />
         <Route path="/family-dashboard" element={<FamilyDashboard />} />
         <Route path="/family-patients" element={<FamilyDashboard />} />
         <Route path="/family-alerts" element={<FamilyDashboard />} />
         <Route path="/family-reports" element={<FamilyDashboard />} />
         <Route path="/family-profile" element={<FamilyDashboard />} />
-        <Route path="/family-vitals" element={<MotherVitalsScreen />} />
+        <Route path="/caretaker/vitals" element={<CaretakerVitals />} />
+        <Route path="/caretaker/reports" element={<CaretakerReports />} />
+        <Route path="/caretaker/alerts" element={<CaretakerAlerts />} />
+        <Route path="/caretaker/profile" element={<CaretakerProfile />} />
 
         {/* Shared / Global Routes */}
         <Route path="/shared/ai-report" element={<AIReportResultScreen />} />
+        <Route path="/report/:reportId" element={<ReportViewer />} />
         <Route path="/shared/ring-alert" element={<RingAlertScreen />} />
         <Route path="/settings" element={<SettingsScreen />} />
         

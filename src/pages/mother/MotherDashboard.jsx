@@ -48,6 +48,12 @@ const MotherDashboard = () => {
   const { profile } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [avatarErr, setAvatarErr] = useState(false);
+  
+  React.useEffect(() => {
+    if (profile && profile.isSurveyCompleted === false) {
+      navigate('/mother/medical-history');
+    }
+  }, [profile, navigate]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [reportGenerated, setReportGenerated] = useState(false);
   const { vitals, latestVitals } = useVitals(profile?.uid);
@@ -159,14 +165,6 @@ const MotherDashboard = () => {
               }}>{lang.toUpperCase()}</button>
             ))}
           </div>
-          <button onClick={toggleTheme} style={{
-            width: '36px', height: '36px', borderRadius: '50%',
-            background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', color: 'var(--text-secondary)', flexShrink: 0
-          }}>
-            {theme === 'light' ? <MdOutlineDarkMode size={18}/> : <MdOutlineLightMode size={18}/>}
-          </button>
           <div onClick={() => navigate('/mother/profile')} style={{
             width: '40px', height: '40px', borderRadius: '50%', background: 'var(--accent-light)', border: '2px solid var(--accent)',
             overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0

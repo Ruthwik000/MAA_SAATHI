@@ -92,24 +92,8 @@ const DoctorDashboard = () => {
     return fireAlerts.length === 0 ? MOCK_ALERTS : [...fireAlerts, ...MOCK_ALERTS];
   }, [firestoreAlerts]);
 
-  const handleViewReport = async (rep) => {
-    setIsGenerating(true);
-    try {
-      // Create a full profile object for the report
-      const reportProfile = {
-        name: rep.name,
-        age: rep.age,
-        patientType: rep.patientType,
-        phc: rep.phc
-      };
-      // Mock survey status based on report urgency
-      const reportSurvey = { aiStatus: rep.urgency };
-      generateProfessionalReport(reportProfile, [], reportSurvey, 'view', 'instant');
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsGenerating(false);
-    }
+  const handleViewReport = (rep) => {
+    navigate(`/report/${rep.id}`);
   };
 
   const filteredAlerts = combinedAlerts.filter(a => activeFilter === 'All' || a.patientType === activeFilter);
@@ -165,9 +149,6 @@ const DoctorDashboard = () => {
                 </button>
               ))}
             </div>
-            <button onClick={toggleTheme} style={{ width: '40px', height: '40px', borderRadius: '50%', background: themeColors.surfaceLow, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-              {theme === 'light' ? <MdOutlineDarkMode /> : <MdOutlineLightMode />}
-            </button>
           </div>
         </header>
 

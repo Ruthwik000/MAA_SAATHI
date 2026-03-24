@@ -85,7 +85,7 @@ const MotherReportsScreen = () => {
             <div 
               key={rep.id} 
               style={cardStyle}
-              onClick={() => navigate(`/mother/report/${rep.id}`, { state: { report: rep } })}
+              onClick={() => navigate(`/report/${rep.id}`)}
             >
               <div style={{
                 width: '48px', height: '48px', borderRadius: 'var(--radius-md)',

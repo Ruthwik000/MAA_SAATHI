@@ -15,18 +15,21 @@ const RoleSetupScreen = () => {
     if (!selectedRole) return;
     setLoading(true);
     try {
-      await setupRole(selectedRole, preSelectedType);
-      
-      if (selectedRole === 'asha') navigate('/asha/dashboard');
-      else if (selectedRole === 'doctor') navigate('/doctor/dashboard');
-      else if (selectedRole === 'mother') navigate('/mother/dashboard');
-      else if (selectedRole === 'caretaker') navigate('/caretaker-type');
+      if (selectedRole === 'asha') await setupRole('asha', '', true);
+      else if (selectedRole === 'doctor') await setupRole('doctor', '', true);
+      else if (selectedRole === 'caretaker') await setupRole('caretaker', '', true);
+      else await setupRole(selectedRole, preSelectedType, false);
+
+      if (selectedRole === 'asha') navigate('/asha/dashboard', { replace: true });
+      else if (selectedRole === 'doctor') navigate('/doctor/dashboard', { replace: true });
+      else if (selectedRole === 'mother') navigate('/mother/medical-history', { replace: true });
+      else if (selectedRole === 'caretaker') navigate('/family-dashboard', { replace: true });
       else if (selectedRole === 'patient') {
-        if (preSelectedType === 'elderly') navigate('/elderly/health-survey');
-        else if (preSelectedType === 'wellness') navigate('/wellness/health-survey');
-        else navigate('/welcome');
+        if (preSelectedType === 'elderly') navigate('/elderly/health-survey', { replace: true });
+        else if (preSelectedType === 'wellness') navigate('/wellness/health-survey', { replace: true });
+        else navigate('/welcome', { replace: true });
       }
-      else navigate('/welcome');
+      else navigate('/welcome', { replace: true });
     } catch (e) {
       console.error(e);
       setLoading(false);
