@@ -23,13 +23,20 @@ const PatientLayout = ({ children, role = 'mother', patientType = '' }) => {
       minHeight: '100dvh',
       background: 'var(--bg-secondary)',
       fontFamily: '"DM Sans", sans-serif',
-      paddingBottom: '96px'
+      paddingBottom: 'calc(96px + env(safe-area-inset-bottom))',
+      paddingTop: 'env(safe-area-inset-top)',
+      paddingLeft: 'env(safe-area-inset-left)',
+      paddingRight: 'env(safe-area-inset-right)'
     }}>
       {children}
 
       <div style={{
-        position: 'fixed', bottom: '16px',
-        left: '24px', right: '24px', zIndex: 100, pointerEvents: 'none'
+        position: 'fixed', 
+        bottom: 'calc(16px + env(safe-area-inset-bottom))',
+        left: '24px', 
+        right: '24px', 
+        zIndex: 100, 
+        pointerEvents: 'none'
       }}>
         <div style={{
           maxWidth: '480px', margin: '0 auto', pointerEvents: 'auto',
