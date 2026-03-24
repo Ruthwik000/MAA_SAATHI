@@ -1,0 +1,172 @@
+import React, { createContext, useState, useEffect } from 'react';
+import { auth, db } from '../config/firebase';
+import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+
+export const AuthContext = createContext();
+
+const AUTH_ERROR_MESSAGES = {
+  'auth/configuration-not-found':
+    'Firebase Google Sign-In is not configured for this project. Update your .env Firebase keys and enable Google sign-in in Firebase Console.',
+  'auth/invalid-api-key':
+    'Firebase API key is invalid. Update VITE_FIREBASE_API_KEY in your .env file.',
+  'auth/unauthorized-domain':
+    'This domain is not authorized for Firebase Auth. Add localhost in Firebase Authentication authorized domains.'
+};
+
+const isFirestoreAccessError = (error) => {
+  const code = String(error?.code || '');
+  const message = String(error?.message || '');
+
+  return (
+    code === 'permission-denied' ||
+    code === 'unavailable' ||
+    message.includes('Cloud Firestore API has not been used') ||
+    message.includes('client is offline')
+  );
+};
+
+const normalizeAuthError = (error) => {
+  const code = error?.code || '';
+  const fallbackMessage = error?.message || 'Google sign-in failed.';
+  const message = AUTH_ERROR_MESSAGES[code] || fallbackMessage;
+
+  const normalized = new Error(message);
+  normalized.code = code;
+  normalized.cause = error;
+  return normalized;
+};
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+      if (authUser) {
+        setUser(authUser);
+        try {
+          const profileRef = doc(db, 'users', authUser.uid);
+          const profileSnap = await getDoc(profileRef);
+
+          if (profileSnap.exists()) {
+            setProfile(profileSnap.data());
+          } else {
+            setProfile(null);
+          }
+        } catch (error) {
+          // Firestore may be temporarily unavailable/misconfigured in dev; avoid noisy hard errors.
+          if (!isFirestoreAccessError(error)) {
+            console.error('Error fetching user profile:', error);
+          }
+          setProfile(null);
+        }
+      } else {
+        setUser(null);
+        setProfile(null);
+      }
+      setLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const loginWithGoogle = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+
+      const loggedInUser = result.user;
+      const profileRef = doc(db, 'users', loggedInUser.uid);
+
+      try {
+        const profileSnap = await getDoc(profileRef);
+
+        if (profileSnap.exists()) {
+          const data = profileSnap.data();
+          setProfile(data);
+          setUser(loggedInUser);
+          return { isNewUser: false, profile: data };
+        }
+      } catch (error) {
+        if (isFirestoreAccessError(error)) {
+          setUser(loggedInUser);
+          setProfile(null);
+          return {
+            isNewUser: true,
+            user: loggedInUser,
+            firestoreUnavailable: true,
+            firestoreMessage:
+              'Google sign-in succeeded, but Cloud Firestore is unavailable. Enable Firestore API / fix permissions and retry.'
+          };
+        }
+        throw error;
+      }
+
+      setUser(loggedInUser);
+      setProfile(null);
+      return { isNewUser: true, user: loggedInUser };
+    } catch (error) {
+      throw normalizeAuthError(error);
+    }
+  };
+
+  const setupRole = async (role) => {
+    if (!user) throw new Error('No user authenticated');
+
+    const profileData = {
+      uid: user.uid,
+      name: user.displayName || 'Unknown User',
+      email: user.email || '',
+      photoURL: user.photoURL || '',
+      role,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    };
+
+    const profileRef = doc(db, 'users', user.uid);
+    await setDoc(profileRef, profileData);
+
+    setProfile(profileData);
+    return profileData;
+  };
+
+  const logout = async () => {
+    await signOut(auth);
+    setUser(null);
+    setProfile(null);
+  };
+
+  const updateProfile = async (data) => {
+    if (!user) return;
+    const profileRef = doc(db, 'users', user.uid);
+    await setDoc(
+      profileRef,
+      {
+        ...data,
+        updatedAt: serverTimestamp()
+      },
+      { merge: true }
+    );
+
+    const profileSnap = await getDoc(profileRef);
+    setProfile(profileSnap.data());
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        profile,
+        loading,
+        loginWithGoogle,
+        setupRole,
+        logout,
+        updateProfile
+      }}
+    >
+      {!loading && children}
+    </AuthContext.Provider>
+  );
+};
